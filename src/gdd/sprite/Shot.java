@@ -5,8 +5,8 @@ import javax.swing.ImageIcon;
 
 public class Shot extends Sprite {
 
-    private static final int H_SPACE = 20;
-    private static final int V_SPACE = 1;
+    private static final int H_SPACE = 40;
+    private static final int V_SPACE = 20;
 
     public Shot() {
     }
@@ -27,6 +27,6 @@ public class Shot extends Sprite {
         setImage(scaledImage);
 
         setX(x + H_SPACE);
-        setY(y - V_SPACE);
+        setY(y + V_SPACE);
     }
 }

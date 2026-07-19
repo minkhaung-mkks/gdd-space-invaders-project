@@ -7,9 +7,10 @@ import javax.swing.ImageIcon;
 
 public class Player extends Sprite {
 
-    private static final int START_X = 270;
-    private static final int START_Y = 540;
+    private static final int START_X = 40;
+    private static final int START_Y = BOARD_HEIGHT / 2;
     private int width;
+    private int dy;
     private int currentSpeed = 2;
 
     private Rectangle bounds = new Rectangle(175,135,17,32);
@@ -44,38 +45,38 @@ public class Player extends Sprite {
     }
 
     public void act() {
-        x += dx;
+        y += dy;
 
-        if (x <= 2) {
-            x = 2;
+        if (y <= 2) {
+            y = 2;
         }
 
-        if (x >= BOARD_WIDTH - 2 * width) {
-            x = BOARD_WIDTH - 2 * width;
+        if (y >= BOARD_HEIGHT - 3 * PLAYER_HEIGHT) {
+            y = BOARD_HEIGHT - 3 * PLAYER_HEIGHT;
         }
     }
 
     public void keyPressed(KeyEvent e) {
         int key = e.getKeyCode();
 
-        if (key == KeyEvent.VK_LEFT) {
-            dx = -currentSpeed;
+        if (key == KeyEvent.VK_UP || key == KeyEvent.VK_W) {
+            dy = -currentSpeed;
         }
 
-        if (key == KeyEvent.VK_RIGHT) {
-            dx = currentSpeed;
+        if (key == KeyEvent.VK_DOWN || key == KeyEvent.VK_S) {
+            dy = currentSpeed;
         }
     }
 
     public void keyReleased(KeyEvent e) {
         int key = e.getKeyCode();
 
-        if (key == KeyEvent.VK_LEFT) {
-            dx = 0;
+        if (key == KeyEvent.VK_UP || key == KeyEvent.VK_W) {
+            dy = 0;
         }
 
-        if (key == KeyEvent.VK_RIGHT) {
-            dx = 0;
+        if (key == KeyEvent.VK_DOWN || key == KeyEvent.VK_S) {
+            dy = 0;
         }
     }
 }

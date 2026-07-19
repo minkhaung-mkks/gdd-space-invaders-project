@@ -29,7 +29,7 @@ public class Alien1 extends Enemy {
     }
 
     public void act(int direction) {
-        this.y ++;
+        this.x--;
     }
 
     public Bomb getBomb() {
@@ -57,7 +57,6 @@ public class Alien1 extends Enemy {
             var ii = new ImageIcon(bombImg);
             setImage(ii.getImage());
         }
-
         public void setDestroyed(boolean destroyed) {
 
             this.destroyed = destroyed;

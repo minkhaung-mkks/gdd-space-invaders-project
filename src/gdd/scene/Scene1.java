@@ -109,19 +109,19 @@ public class Scene1 extends JPanel {
 
     private void loadSpawnDetails() {
         // TODO load this from a file
-        spawnMap.put(50, new SpawnDetails("PowerUp-SpeedUp", 100, 0));
-        spawnMap.put(200, new SpawnDetails("Alien1", 200, 0));
-        spawnMap.put(300, new SpawnDetails("Alien1", 300, 0));
+        spawnMap.put(50, new SpawnDetails("PowerUp-SpeedUp", BOARD_WIDTH, 100));
+        spawnMap.put(200, new SpawnDetails("Alien1", BOARD_WIDTH, 200));
+        spawnMap.put(300, new SpawnDetails("Alien1", BOARD_WIDTH, 300));
 
-        spawnMap.put(400, new SpawnDetails("Alien1", 400, 0));
-        spawnMap.put(401, new SpawnDetails("Alien1", 450, 0));
-        spawnMap.put(402, new SpawnDetails("Alien1", 500, 0));
-        spawnMap.put(403, new SpawnDetails("Alien1", 550, 0));
+        spawnMap.put(400, new SpawnDetails("Alien1", BOARD_WIDTH, 400));
+        spawnMap.put(401, new SpawnDetails("Alien1", BOARD_WIDTH, 450));
+        spawnMap.put(402, new SpawnDetails("Alien1", BOARD_WIDTH, 500));
+        spawnMap.put(403, new SpawnDetails("Alien1", BOARD_WIDTH, 550));
 
-        spawnMap.put(500, new SpawnDetails("Alien1", 100, 0));
-        spawnMap.put(501, new SpawnDetails("Alien1", 150, 0));
-        spawnMap.put(502, new SpawnDetails("Alien1", 200, 0));
-        spawnMap.put(503, new SpawnDetails("Alien1", 350, 0));
+        spawnMap.put(500, new SpawnDetails("Alien1", BOARD_WIDTH, 100));
+        spawnMap.put(501, new SpawnDetails("Alien1", BOARD_WIDTH, 150));
+        spawnMap.put(502, new SpawnDetails("Alien1", BOARD_WIDTH, 200));
+        spawnMap.put(503, new SpawnDetails("Alien1", BOARD_WIDTH, 350));
     }
 
     private void initBoard() {
@@ -171,34 +171,29 @@ public class Scene1 extends JPanel {
     }
 
     private void drawMap(Graphics g) {
-        // Draw scrolling starfield background
 
         // Calculate smooth scrolling offset (1 pixel per frame)
-        int scrollOffset = (frame) % BLOCKHEIGHT;
+        int scrollOffset = (frame) % BLOCKWIDTH;
 
-        // Calculate which rows to draw based on screen position
-        int baseRow = (frame) / BLOCKHEIGHT;
-        int rowsNeeded = (BOARD_HEIGHT / BLOCKHEIGHT) + 2; // +2 for smooth scrolling
+        int baseCol = (frame) / BLOCKWIDTH;
+        int colsNeeded = (BOARD_WIDTH / BLOCKWIDTH) + 2; // +2 for smooth scrolling
 
-        // Loop through rows that should be visible on screen
-        for (int screenRow = 0; screenRow < rowsNeeded; screenRow++) {
-            // Calculate which MAP row to use (with wrapping)
-            int mapRow = (baseRow + screenRow) % MAP.length;
+        for (int screenCol = 0; screenCol < colsNeeded; screenCol++) {
+            int mapRow = (baseCol + screenCol) % MAP.length;
 
-            // Calculate Y position for this row
-            // int y = (screenRow * BLOCKHEIGHT) - scrollOffset;
-            int y = BOARD_HEIGHT - ( (screenRow * BLOCKHEIGHT) - scrollOffset );
+            // Calculate X position for this row
+            int x = BOARD_WIDTH - ( (screenCol * BLOCKWIDTH) - scrollOffset );
 
             // Skip if row is completely off-screen
-            if (y > BOARD_HEIGHT || y < -BLOCKHEIGHT) {
+            if (x > BOARD_WIDTH || x < -BLOCKWIDTH) {
                 continue;
             }
 
-            // Draw each column in this row
+            // Draw each block in this row
             for (int col = 0; col < MAP[mapRow].length; col++) {
                 if (MAP[mapRow][col] == 1) {
-                    // Calculate X position
-                    int x = col * BLOCKWIDTH;
+                    // Calculate Y position
+                    int y = col * BLOCKHEIGHT;
 
                     // Draw a cluster of stars
                     drawStarCluster(g, x, y, BLOCKWIDTH, BLOCKHEIGHT);
@@ -456,15 +451,14 @@ public class Scene1 extends JPanel {
                     }
                 }
 
-                int y = shot.getY();
-                // y -= 4;
-                y -= 20;
+                int x = shot.getX();
+                x += 20;
 
-                if (y < 0) {
+                if (x > BOARD_WIDTH) {
                     shot.die();
                     shotsToRemove.add(shot);
                 } else {
-                    shot.setY(y);
+                    shot.setX(x);
                 }
             }
         }

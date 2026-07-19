@@ -26,7 +26,6 @@ public class Explosion extends Sprite {
     }
 
     public void act(int direction) {
-
         // this.x += direction;
     }
 
