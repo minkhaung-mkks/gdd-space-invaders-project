@@ -11,10 +11,14 @@ import gdd.sprite.Enemy;
 import gdd.sprite.Explosion;
 import gdd.sprite.Player;
 import gdd.sprite.Shot;
+import java.awt.AlphaComposite;
 import java.awt.Color;
+import java.awt.Composite;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -45,6 +49,8 @@ public class Scene1 extends JPanel {
 
     private int direction = -1;
     private int deaths = 0;
+    private int score = 0;
+    private int maxShots = 4;
 
     private boolean inGame = true;
     private String message = "Game Over";
@@ -284,12 +290,50 @@ public class Scene1 extends JPanel {
 
     private void drawBombing(Graphics g) {
 
-        // for (Enemy e : enemies) {
-        //     Enemy.Bomb b = e.getBomb();
-        //     if (!b.isDestroyed()) {
-        //         g.drawImage(b.getImage(), b.getX(), b.getY(), this);
-        //     }
-        // }
+        for (Enemy e : enemies) {
+            if (e instanceof Alien1) {
+                Alien1.Bomb bomb = ((Alien1) e).getBomb();
+                if (!bomb.isDestroyed()) {
+                    g.drawImage(bomb.getImage(), bomb.getX(), bomb.getY(), this);
+                }
+            }
+        }
+    }
+
+    private void drawDashboard(Graphics g) {
+
+        g.setColor(Color.white);
+        g.setFont(new Font("Helvetica", Font.PLAIN, 12));
+        g.drawString("Score: " + score, 10, 25);
+        g.drawString("Speed: " + player.getSpeed(), 10, 40);
+        g.drawString("Shots: " + maxShots, 10, 55);
+
+        drawSpeedUpTracker(g);
+    }
+
+    private void drawSpeedUpTracker(Graphics g) {
+
+        Graphics2D g2d = (Graphics2D) g;
+        var ii = new ImageIcon(IMG_POWERUP_SPEEDUP);
+        Image icon = ii.getImage();
+
+        int iconSize = 20;
+        int startX = 10;
+        int startY = 65;
+        int gap = 25;
+
+        for (int i = 0; i < 2; i++) {
+            int x = startX + i * gap;
+            g2d.drawImage(icon, x, startY, iconSize, iconSize, this);
+
+            if (i >= player.getSpeedUpCount()) {
+                Composite oldComposite = g2d.getComposite();
+                g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.75f));
+                g2d.setColor(Color.black);
+                g2d.fillRect(x, startY, iconSize, iconSize);
+                g2d.setComposite(oldComposite);
+            }
+        }
     }
 
     private void drawExplosions(Graphics g) {
@@ -333,8 +377,10 @@ public class Scene1 extends JPanel {
             drawExplosions(g);
             drawPowreUps(g);
             drawAliens(g);
+            drawBombing(g);
             drawPlayer(g);
             drawShot(g);
+            drawDashboard(g);
 
         } else {
 
@@ -446,6 +492,7 @@ public class Scene1 extends JPanel {
                         enemy.setDying(true);
                         explosions.add(new Explosion(enemyX, enemyY));
                         deaths++;
+                        score += 10;
                         shot.die();
                         shotsToRemove.add(shot);
                     }
@@ -492,17 +539,25 @@ public class Scene1 extends JPanel {
         // }
         // bombs - collision detection
         // Bomb is with enemy, so it loops over enemies
-        /*
         for (Enemy enemy : enemies) {
 
+            if (!(enemy instanceof Alien1)) {
+                continue;
+            }
+
+            Alien1.Bomb bomb = ((Alien1) enemy).getBomb();
+
             int chance = randomizer.nextInt(15);
-            Enemy.Bomb bomb = enemy.getBomb();
 
             if (chance == CHANCE && enemy.isVisible() && bomb.isDestroyed()) {
 
                 bomb.setDestroyed(false);
                 bomb.setX(enemy.getX());
                 bomb.setY(enemy.getY());
+            }
+
+            if (!bomb.isDestroyed()) {
+                bomb.setX(bomb.getX() - 4);
             }
 
             int bombX = bomb.getX();
@@ -522,14 +577,10 @@ public class Scene1 extends JPanel {
                 bomb.setDestroyed(true);
             }
 
-            if (!bomb.isDestroyed()) {
-                bomb.setY(bomb.getY() + 1);
-                if (bomb.getY() >= GROUND - BOMB_HEIGHT) {
-                    bomb.setDestroyed(true);
-                }
+            if (!bomb.isDestroyed() && bomb.getX() < 0) {
+                bomb.setDestroyed(true);
             }
         }
-         */
     }
 
     private void doGameCycle() {
@@ -566,7 +617,7 @@ public class Scene1 extends JPanel {
 
             if (key == KeyEvent.VK_SPACE && inGame) {
                 System.out.println("Shots: " + shots.size());
-                if (shots.size() < 4) {
+                if (shots.size() < maxShots) {
                     // Create a new shot and add it to the list
                     Shot shot = new Shot(x, y);
                     shots.add(shot);

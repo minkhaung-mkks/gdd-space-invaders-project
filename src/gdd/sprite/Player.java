@@ -1,8 +1,11 @@
 package gdd.sprite;
 
 import static gdd.Global.*;
+import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
+import java.awt.image.BufferedImage;
 import javax.swing.ImageIcon;
 
 public class Player extends Sprite {
@@ -12,6 +15,7 @@ public class Player extends Sprite {
     private int width;
     private int dy;
     private int currentSpeed = 2;
+    private int speedUpCount = 0;
 
     private Rectangle bounds = new Rectangle(175,135,17,32);
 
@@ -22,14 +26,26 @@ public class Player extends Sprite {
     private void initPlayer() {
         var ii = new ImageIcon(IMG_PLAYER);
 
+        Image rotatedImage = rotateImage90(ii.getImage(), ii.getIconWidth(), ii.getIconHeight());
+
         // Scale the image to use the global scaling factor
-        var scaledImage = ii.getImage().getScaledInstance(ii.getIconWidth() * SCALE_FACTOR,
-                ii.getIconHeight() * SCALE_FACTOR,
+        var scaledImage = rotatedImage.getScaledInstance(ii.getIconHeight() * SCALE_FACTOR,
+                ii.getIconWidth() * SCALE_FACTOR,
                 java.awt.Image.SCALE_SMOOTH);
         setImage(scaledImage);
 
         setX(START_X);
         setY(START_Y);
+    }
+
+    private Image rotateImage90(Image source, int width, int height) {
+        var rotated = new BufferedImage(height, width, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2d = rotated.createGraphics();
+        g2d.translate((height - width) / 2.0, (width - height) / 2.0);
+        g2d.rotate(Math.PI / 2, width / 2.0, height / 2.0);
+        g2d.drawImage(source, 0, 0, null);
+        g2d.dispose();
+        return rotated;
     }
 
     public int getSpeed() {
@@ -42,6 +58,14 @@ public class Player extends Sprite {
         }
         this.currentSpeed = speed;
         return currentSpeed;
+    }
+
+    public int getSpeedUpCount() {
+        return speedUpCount;
+    }
+
+    public void incrementSpeedUpCount() {
+        speedUpCount++;
     }
 
     public void act() {

@@ -1,7 +1,9 @@
 package gdd.sprite;
 
-import static gdd.Global.*;
-import javax.swing.ImageIcon;
+import javax.swing.*;
+
+import static gdd.Global.IMG_SHOT;
+import static gdd.Global.SCALE_FACTOR;
 
 public class Shot extends Sprite {
 
@@ -20,7 +22,6 @@ public class Shot extends Sprite {
 
         var ii = new ImageIcon(IMG_SHOT);
 
-        // Scale the image to use the global scaling factor
         var scaledImage = ii.getImage().getScaledInstance(ii.getIconWidth() * SCALE_FACTOR,
                 ii.getIconHeight() * SCALE_FACTOR, 
                 java.awt.Image.SCALE_SMOOTH);

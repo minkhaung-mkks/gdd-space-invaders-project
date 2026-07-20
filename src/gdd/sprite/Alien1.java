@@ -9,7 +9,7 @@ public class Alien1 extends Enemy {
 
     public Alien1(int x, int y) {
         super(x, y);
-        // initEnemy(x, y);
+        bomb = new Bomb(x, y);
     }
 
     private void initEnemy(int x, int y) {

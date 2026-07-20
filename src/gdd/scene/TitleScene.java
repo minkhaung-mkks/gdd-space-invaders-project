@@ -5,6 +5,7 @@ import gdd.Game;
 import static gdd.Global.*;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Toolkit;
@@ -91,7 +92,13 @@ public class TitleScene extends JPanel {
         g.setColor(Color.black);
         g.fillRect(0, 0, d.width, d.height);
 
-        g.drawImage(image, 0, -80, d.width, d.height, this);
+        g.setColor(Color.white);
+        g.setFont(g.getFont().deriveFont(Font.BOLD, 48f));
+        String title = "SPACE SHOOTER";
+        int titleWidth = g.getFontMetrics().stringWidth(title);
+        g.drawString(title, (d.width - titleWidth) / 2, d.height / 2 - 40);
+
+        g.drawRect(40, d.height / 2 - 100, d.width - 80, 160);
 
         if (frame % 60 < 30) {
             g.setColor(Color.red);
@@ -109,7 +116,8 @@ public class TitleScene extends JPanel {
 
         g.setColor(Color.gray);
         g.setFont(g.getFont().deriveFont(10f));
-        g.drawString("Game by Chayapol", 10, 650);
+        g.drawString("6712164 - Min Khaung Kyaw Swar", 10, 640);
+        g.drawString("6xxxxx - Lwin Pyae Aung", 10, 650);
 
         Toolkit.getDefaultToolkit().sync();
     }
