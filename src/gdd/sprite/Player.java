@@ -70,6 +70,7 @@ public class Player extends Sprite {
 
     public void act() {
         y += dy;
+        x += dx;
 
         if (y <= 2) {
             y = 2;
@@ -77,6 +78,14 @@ public class Player extends Sprite {
 
         if (y >= BOARD_HEIGHT - 3 * PLAYER_HEIGHT) {
             y = BOARD_HEIGHT - 3 * PLAYER_HEIGHT;
+        }
+
+        if (x <= 2) {
+            x = 2;
+        }
+
+        if (x >= BOARD_WIDTH - 4 * PLAYER_WIDTH) {
+            x = BOARD_WIDTH - 4 * PLAYER_WIDTH;
         }
     }
 
@@ -90,6 +99,14 @@ public class Player extends Sprite {
         if (key == KeyEvent.VK_DOWN || key == KeyEvent.VK_S) {
             dy = currentSpeed;
         }
+
+        if (key == KeyEvent.VK_LEFT || key == KeyEvent.VK_A) {
+            dx = -currentSpeed;
+        }
+
+        if (key == KeyEvent.VK_RIGHT || key == KeyEvent.VK_D) {
+            dx = currentSpeed;
+        }
     }
 
     public void keyReleased(KeyEvent e) {
@@ -101,6 +118,14 @@ public class Player extends Sprite {
 
         if (key == KeyEvent.VK_DOWN || key == KeyEvent.VK_S) {
             dy = 0;
+        }
+
+        if (key == KeyEvent.VK_LEFT || key == KeyEvent.VK_A) {
+            dx = 0;
+        }
+
+        if (key == KeyEvent.VK_RIGHT || key == KeyEvent.VK_D) {
+            dx = 0;
         }
     }
 }

@@ -9,6 +9,7 @@ import gdd.powerup.SpeedUp;
 import gdd.sprite.Alien1;
 import gdd.sprite.Enemy;
 import gdd.sprite.Explosion;
+import gdd.sprite.Obstacle;
 import gdd.sprite.Player;
 import gdd.sprite.Shot;
 import java.awt.AlphaComposite;
@@ -39,6 +40,7 @@ public class Scene1 extends JPanel {
     private List<Enemy> enemies;
     private List<Explosion> explosions;
     private List<Shot> shots;
+    private List<Obstacle> obstacles;
     private Player player;
     // private Shot shot;
 
@@ -91,6 +93,26 @@ public class Scene1 extends JPanel {
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}
     };
 
+    // Terrain tile grid.
+    private static final int TILE = 50;
+    private static final int TERRAIN_SPEED = 2;
+    private final int[][] TERRAIN = {
+        {0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1},
+        {0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1},
+        {0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1},
+        {2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+        {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
+    };
+
     private HashMap<Integer, SpawnDetails> spawnMap = new HashMap<>();
     private AudioPlayer audioPlayer;
     private int lastRowToShow;
@@ -116,18 +138,28 @@ public class Scene1 extends JPanel {
     private void loadSpawnDetails() {
         // TODO load this from a file
         spawnMap.put(50, new SpawnDetails("PowerUp-SpeedUp", BOARD_WIDTH, 100));
+        spawnMap.put(150, new SpawnDetails("PowerUp-SpeedUp", BOARD_WIDTH, 100));
         spawnMap.put(200, new SpawnDetails("Alien1", BOARD_WIDTH, 200));
+        spawnMap.put(250, new SpawnDetails("PowerUp-SpeedUp", BOARD_WIDTH, 100));
         spawnMap.put(300, new SpawnDetails("Alien1", BOARD_WIDTH, 300));
-
+        spawnMap.put(350, new SpawnDetails("PowerUp-SpeedUp", BOARD_WIDTH, 100));
+        
         spawnMap.put(400, new SpawnDetails("Alien1", BOARD_WIDTH, 400));
         spawnMap.put(401, new SpawnDetails("Alien1", BOARD_WIDTH, 450));
         spawnMap.put(402, new SpawnDetails("Alien1", BOARD_WIDTH, 500));
         spawnMap.put(403, new SpawnDetails("Alien1", BOARD_WIDTH, 550));
 
+        spawnMap.put(450, new SpawnDetails("Obstacle", BOARD_WIDTH, 150));
+        spawnMap.put(470, new SpawnDetails("Obstacle", BOARD_WIDTH, 400));
+
         spawnMap.put(500, new SpawnDetails("Alien1", BOARD_WIDTH, 100));
         spawnMap.put(501, new SpawnDetails("Alien1", BOARD_WIDTH, 150));
         spawnMap.put(502, new SpawnDetails("Alien1", BOARD_WIDTH, 200));
         spawnMap.put(503, new SpawnDetails("Alien1", BOARD_WIDTH, 350));
+
+        spawnMap.put(600, new SpawnDetails("Obstacle", BOARD_WIDTH, 250));
+        spawnMap.put(700, new SpawnDetails("Obstacle", BOARD_WIDTH, 500));
+        spawnMap.put(800, new SpawnDetails("Obstacle", BOARD_WIDTH, 100));
     }
 
     private void initBoard() {
@@ -164,6 +196,7 @@ public class Scene1 extends JPanel {
         powerups = new ArrayList<>();
         explosions = new ArrayList<>();
         shots = new ArrayList<>();
+        obstacles = new ArrayList<>();
 
         // for (int i = 0; i < 4; i++) {
         // for (int j = 0; j < 6; j++) {
@@ -177,11 +210,17 @@ public class Scene1 extends JPanel {
     }
 
     private void drawMap(Graphics g) {
+        // difference: far scrolls slowest, near fastest.
+        drawParallaxLayer(g, frame / 2, 2);
+        drawParallaxLayer(g, frame, 4);
+        drawParallaxLayer(g, frame * 2, 6);
+    }
 
-        // Calculate smooth scrolling offset (1 pixel per frame)
-        int scrollOffset = (frame) % BLOCKWIDTH;
+    private void drawParallaxLayer(Graphics g, int scroll, int starSize) {
 
-        int baseCol = (frame) / BLOCKWIDTH;
+        int scrollOffset = scroll % BLOCKWIDTH;
+
+        int baseCol = scroll / BLOCKWIDTH;
         int colsNeeded = (BOARD_WIDTH / BLOCKWIDTH) + 2; // +2 for smooth scrolling
 
         for (int screenCol = 0; screenCol < colsNeeded; screenCol++) {
@@ -202,14 +241,14 @@ public class Scene1 extends JPanel {
                     int y = col * BLOCKHEIGHT;
 
                     // Draw a cluster of stars
-                    drawStarCluster(g, x, y, BLOCKWIDTH, BLOCKHEIGHT);
+                    drawStarCluster(g, x, y, BLOCKWIDTH, BLOCKHEIGHT, starSize);
                 }
             }
         }
 
     }
 
-    private void drawStarCluster(Graphics g, int x, int y, int width, int height) {
+    private void drawStarCluster(Graphics g, int x, int y, int width, int height, int starSize) {
         // Set star color to white
         g.setColor(Color.WHITE);
 
@@ -217,7 +256,7 @@ public class Scene1 extends JPanel {
         // Main star (larger)
         int centerX = x + width / 2;
         int centerY = y + height / 2;
-        g.fillOval(centerX - 2, centerY - 2, 4, 4);
+        g.fillOval(centerX - starSize / 2, centerY - starSize / 2, starSize, starSize);
 
         // Smaller surrounding stars
         g.fillOval(centerX - 15, centerY - 10, 2, 2);
@@ -230,6 +269,82 @@ public class Scene1 extends JPanel {
         g.fillOval(centerX + 18, centerY - 15, 1, 1);
         g.fillOval(centerX - 5, centerY - 18, 1, 1);
         g.fillOval(centerX + 8, centerY + 20, 1, 1);
+    }
+
+    // Read one tile. Screen position is turned into a grid row and column.
+    private int tileAt(int col, int row) {
+        if (row < 0 || row >= TERRAIN.length) {
+            return 0;
+        }
+        return TERRAIN[row][col % TERRAIN[row].length];
+    }
+
+    // True if the rectangle touches any solid tile
+    private boolean hitsTerrain(int x, int y, int w, int h) {
+
+        int scroll = frame * TERRAIN_SPEED;
+
+        int firstCol = (scroll + x) / TILE;
+        int lastCol = (scroll + x + w) / TILE;
+        int firstRow = y / TILE;
+        int lastRow = (y + h) / TILE;
+
+        for (int row = firstRow; row <= lastRow; row++) {
+            for (int col = firstCol; col <= lastCol; col++) {
+                if (tileAt(col, row) != 0) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private void drawTerrain(Graphics g) {
+
+        int scroll = frame * TERRAIN_SPEED;
+        int offset = scroll % TILE;
+        int firstCol = scroll / TILE;
+        int cols = (BOARD_WIDTH / TILE) + 2;
+
+        for (int row = 0; row < TERRAIN.length; row++) {
+            for (int i = 0; i < cols; i++) {
+
+                int tile = tileAt(firstCol + i, row);
+
+                if (tile == 0) {
+                    continue;
+                }
+
+                // Calculate screen position for this tile
+                int x = i * TILE - offset;
+                int y = row * TILE;
+
+                drawTile(g, tile, x, y);
+            }
+        }
+    }
+
+    private void drawTile(Graphics g, int tile, int x, int y) {
+
+        if (tile == 1) {
+            g.setColor(new Color(90, 65, 45));
+        } else {
+            g.setColor(new Color(95, 100, 110));
+        }
+
+        g.fillRect(x, y, TILE, TILE);
+    }
+
+    private void drawObstacles(Graphics g) {
+
+        for (Obstacle obstacle : obstacles) {
+
+            if (obstacle.isVisible()) {
+
+                g.drawImage(obstacle.getImage(), obstacle.getX(), obstacle.getY(), this);
+            }
+        }
     }
 
     private void drawAliens(Graphics g) {
@@ -374,6 +489,8 @@ public class Scene1 extends JPanel {
         if (inGame) {
 
             drawMap(g);  // Draw background stars first
+            drawTerrain(g);
+            drawObstacles(g);
             drawExplosions(g);
             drawPowreUps(g);
             drawAliens(g);
@@ -436,6 +553,9 @@ public class Scene1 extends JPanel {
                     PowerUp speedUp = new SpeedUp(sd.x, sd.y);
                     powerups.add(speedUp);
                     break;
+                case "Obstacle":
+                    obstacles.add(new Obstacle(sd.x, sd.y));
+                    break;
                 default:
                     System.out.println("Unknown enemy type: " + sd.type);
                     break;
@@ -450,6 +570,16 @@ public class Scene1 extends JPanel {
 
         // player
         player.act();
+
+        // Terrain collision: player vs ground/ceiling
+        if (player.isVisible() && !player.isDying()
+                && hitsTerrain(player.getX(), player.getY(),
+                        player.getImage().getWidth(null),
+                        player.getImage().getHeight(null))) {
+            var ii = new ImageIcon(IMG_EXPLOSION);
+            player.setImage(ii.getImage());
+            player.setDying(true);
+        }
 
         // Power-ups
         for (PowerUp powerup : powerups) {
@@ -468,6 +598,26 @@ public class Scene1 extends JPanel {
             }
         }
 
+        // Obstacles
+        List<Obstacle> obstaclesToRemove = new ArrayList<>();
+        for (Obstacle obstacle : obstacles) {
+            if (obstacle.isVisible()) {
+                obstacle.act();
+
+                if (obstacle.collidesWith(player)) {
+                    var ii = new ImageIcon(IMG_EXPLOSION);
+                    player.setImage(ii.getImage());
+                    player.setDying(true);
+                }
+
+                if (obstacle.getX() < -100) {
+                    obstacle.die();
+                    obstaclesToRemove.add(obstacle);
+                }
+            }
+        }
+        obstacles.removeAll(obstaclesToRemove);
+
         // shot
         List<Shot> shotsToRemove = new ArrayList<>();
         for (Shot shot : shots) {
@@ -477,15 +627,13 @@ public class Scene1 extends JPanel {
                 int shotY = shot.getY();
 
                 for (Enemy enemy : enemies) {
-                    // Collision detection: shot and enemy
+                    // Collision detection: shot and enemy, using the real
+                    // (scaled) image sizes rather than the unscaled constants
                     int enemyX = enemy.getX();
                     int enemyY = enemy.getY();
 
                     if (enemy.isVisible() && shot.isVisible()
-                            && shotX >= (enemyX)
-                            && shotX <= (enemyX + ALIEN_WIDTH)
-                            && shotY >= (enemyY)
-                            && shotY <= (enemyY + ALIEN_HEIGHT)) {
+                            && shot.collidesWith(enemy)) {
 
                         var ii = new ImageIcon(IMG_EXPLOSION);
                         enemy.setImage(ii.getImage());
@@ -496,6 +644,23 @@ public class Scene1 extends JPanel {
                         shot.die();
                         shotsToRemove.add(shot);
                     }
+                }
+
+                // Obstacles block shots
+                for (Obstacle obstacle : obstacles) {
+                    if (obstacle.isVisible() && shot.isVisible()
+                            && shot.collidesWith(obstacle)) {
+                        shot.die();
+                        shotsToRemove.add(shot);
+                    }
+                }
+
+                // Terrain blocks shots
+                if (shot.isVisible() && hitsTerrain(shot.getX(), shot.getY(),
+                        shot.getImage().getWidth(null),
+                        shot.getImage().getHeight(null))) {
+                    shot.die();
+                    shotsToRemove.add(shot);
                 }
 
                 int x = shot.getX();
@@ -560,16 +725,10 @@ public class Scene1 extends JPanel {
                 bomb.setX(bomb.getX() - 4);
             }
 
-            int bombX = bomb.getX();
-            int bombY = bomb.getY();
-            int playerX = player.getX();
-            int playerY = player.getY();
-
+            // Rect overlap with the real (scaled) image sizes, not the
+            // unscaled PLAYER_WIDTH/HEIGHT constants
             if (player.isVisible() && !bomb.isDestroyed()
-                    && bombX >= (playerX)
-                    && bombX <= (playerX + PLAYER_WIDTH)
-                    && bombY >= (playerY)
-                    && bombY <= (playerY + PLAYER_HEIGHT)) {
+                    && bomb.collidesWith(player)) {
 
                 var ii = new ImageIcon(IMG_EXPLOSION);
                 player.setImage(ii.getImage());
