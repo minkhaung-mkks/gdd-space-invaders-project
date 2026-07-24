@@ -3,6 +3,7 @@ package gdd.scene;
 import gdd.AudioPlayer;
 import gdd.Game;
 import static gdd.Global.*;
+import gdd.LevelLoader;
 import gdd.SpawnDetails;
 import gdd.powerup.PowerUp;
 import gdd.powerup.SpeedUp;
@@ -96,24 +97,9 @@ public class Scene1 extends JPanel {
     // Terrain tile grid.
     private static final int TILE = 50;
     private static final int TERRAIN_SPEED = 2;
-    private final int[][] TERRAIN = {
-        {0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2},
-        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1},
-        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1},
-        {0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1},
-        {0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1},
-        {2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
-        {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
-    };
+    private int[][] TERRAIN;
 
-    private HashMap<Integer, SpawnDetails> spawnMap = new HashMap<>();
+    private HashMap<Integer, SpawnDetails> spawnMap;
     private AudioPlayer audioPlayer;
     private int lastRowToShow;
     private int firstRowToShow;
@@ -123,6 +109,7 @@ public class Scene1 extends JPanel {
         // initBoard();
         // gameInit();
         loadSpawnDetails();
+        loadTerrain();
     }
 
     private void initAudio() {
@@ -136,30 +123,11 @@ public class Scene1 extends JPanel {
     }
 
     private void loadSpawnDetails() {
-        // TODO load this from a file
-        spawnMap.put(50, new SpawnDetails("PowerUp-SpeedUp", BOARD_WIDTH, 100));
-        spawnMap.put(150, new SpawnDetails("PowerUp-SpeedUp", BOARD_WIDTH, 100));
-        spawnMap.put(200, new SpawnDetails("Alien1", BOARD_WIDTH, 200));
-        spawnMap.put(250, new SpawnDetails("PowerUp-SpeedUp", BOARD_WIDTH, 100));
-        spawnMap.put(300, new SpawnDetails("Alien1", BOARD_WIDTH, 300));
-        spawnMap.put(350, new SpawnDetails("PowerUp-SpeedUp", BOARD_WIDTH, 100));
-        
-        spawnMap.put(400, new SpawnDetails("Alien1", BOARD_WIDTH, 400));
-        spawnMap.put(401, new SpawnDetails("Alien1", BOARD_WIDTH, 450));
-        spawnMap.put(402, new SpawnDetails("Alien1", BOARD_WIDTH, 500));
-        spawnMap.put(403, new SpawnDetails("Alien1", BOARD_WIDTH, 550));
+        spawnMap = LevelLoader.loadSpawns(LEVEL_SCENE1_SPAWNS);
+    }
 
-        spawnMap.put(450, new SpawnDetails("Obstacle", BOARD_WIDTH, 150));
-        spawnMap.put(470, new SpawnDetails("Obstacle", BOARD_WIDTH, 400));
-
-        spawnMap.put(500, new SpawnDetails("Alien1", BOARD_WIDTH, 100));
-        spawnMap.put(501, new SpawnDetails("Alien1", BOARD_WIDTH, 150));
-        spawnMap.put(502, new SpawnDetails("Alien1", BOARD_WIDTH, 200));
-        spawnMap.put(503, new SpawnDetails("Alien1", BOARD_WIDTH, 350));
-
-        spawnMap.put(600, new SpawnDetails("Obstacle", BOARD_WIDTH, 250));
-        spawnMap.put(700, new SpawnDetails("Obstacle", BOARD_WIDTH, 500));
-        spawnMap.put(800, new SpawnDetails("Obstacle", BOARD_WIDTH, 100));
+    private void loadTerrain() {
+        TERRAIN = LevelLoader.loadGrid(LEVEL_SCENE1_TERRAIN);
     }
 
     private void initBoard() {

@@ -35,4 +35,8 @@ public class Global {
     public static final String IMG_EXPLOSION = "src/images/explosion.png";
     public static final String IMG_TITLE = "src/images/title.png";
     public static final String IMG_POWERUP_SPEEDUP = "src/images/powerup-s.png";
+
+    // Levels
+    public static final String LEVEL_SCENE1_TERRAIN = "src/levels/scene1-terrain.csv";
+    public static final String LEVEL_SCENE1_SPAWNS = "src/levels/scene1-spawns.csv";
 }
