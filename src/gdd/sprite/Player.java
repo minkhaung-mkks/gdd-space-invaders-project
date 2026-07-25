@@ -16,6 +16,8 @@ public class Player extends Sprite {
     private int dy;
     private int currentSpeed = 2;
     private int speedUpCount = 0;
+    private int maxShots = 1;
+    private int multiShotCount = 0;
 
     private Rectangle bounds = new Rectangle(175,135,17,32);
 
@@ -66,6 +68,22 @@ public class Player extends Sprite {
 
     public void incrementSpeedUpCount() {
         speedUpCount++;
+    }
+
+    public int getMaxShots() {
+        return maxShots;
+    }
+
+    public void setMaxShots(int maxShots) {
+        this.maxShots = maxShots;
+    }
+
+    public int getMultiShotCount() {
+        return multiShotCount;
+    }
+
+    public void incrementMultiShotCount() {
+        multiShotCount++;
     }
 
     public void act() {
