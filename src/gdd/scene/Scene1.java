@@ -5,6 +5,7 @@ import gdd.Game;
 import static gdd.Global.*;
 import gdd.LevelLoader;
 import gdd.SpawnDetails;
+import gdd.powerup.MultiShot;
 import gdd.powerup.PowerUp;
 import gdd.powerup.SpeedUp;
 import gdd.sprite.Alien1;
@@ -53,7 +54,6 @@ public class Scene1 extends JPanel {
     private int direction = -1;
     private int deaths = 0;
     private int score = 0;
-    private int maxShots = 4;
 
     private boolean inGame = true;
     private String message = "Game Over";
@@ -389,9 +389,10 @@ public class Scene1 extends JPanel {
         g.setFont(new Font("Helvetica", Font.PLAIN, 12));
         g.drawString("Score: " + score, 10, 25);
         g.drawString("Speed: " + player.getSpeed(), 10, 40);
-        g.drawString("Shots: " + maxShots, 10, 55);
+        g.drawString("Shots: " + player.getMaxShots(), 10, 55);
 
         drawSpeedUpTracker(g);
+        drawMultiShotTracker(g);
     }
 
     private void drawSpeedUpTracker(Graphics g) {
@@ -410,6 +411,31 @@ public class Scene1 extends JPanel {
             g2d.drawImage(icon, x, startY, iconSize, iconSize, this);
 
             if (i >= player.getSpeedUpCount()) {
+                Composite oldComposite = g2d.getComposite();
+                g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.75f));
+                g2d.setColor(Color.black);
+                g2d.fillRect(x, startY, iconSize, iconSize);
+                g2d.setComposite(oldComposite);
+            }
+        }
+    }
+
+    private void drawMultiShotTracker(Graphics g) {
+
+        Graphics2D g2d = (Graphics2D) g;
+        var ii = new ImageIcon(IMG_SHOT);
+        Image icon = ii.getImage();
+
+        int iconSize = 20;
+        int startX = 80;
+        int startY = 65;
+        int gap = 25;
+
+        for (int i = 0; i < 2; i++) {
+            int x = startX + i * gap;
+            g2d.drawImage(icon, x, startY, iconSize, iconSize, this);
+
+            if (i >= player.getMultiShotCount()) {
                 Composite oldComposite = g2d.getComposite();
                 g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.75f));
                 g2d.setColor(Color.black);
@@ -520,6 +546,10 @@ public class Scene1 extends JPanel {
                     // Handle speed up item spawn
                     PowerUp speedUp = new SpeedUp(sd.x, sd.y);
                     powerups.add(speedUp);
+                    break;
+                case "PowerUp-MultiShot":
+                    PowerUp multiShot = new MultiShot(sd.x, sd.y);
+                    powerups.add(multiShot);
                     break;
                 case "Obstacle":
                     obstacles.add(new Obstacle(sd.x, sd.y));
@@ -744,7 +774,7 @@ public class Scene1 extends JPanel {
 
             if (key == KeyEvent.VK_SPACE && inGame) {
                 System.out.println("Shots: " + shots.size());
-                if (shots.size() < maxShots) {
+                if (shots.size() < player.getMaxShots()) {
                     // Create a new shot and add it to the list
                     Shot shot = new Shot(x, y);
                     shots.add(shot);
