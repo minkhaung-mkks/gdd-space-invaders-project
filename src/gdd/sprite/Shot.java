@@ -1,9 +1,7 @@
 package gdd.sprite;
 
-import javax.swing.*;
-
-import static gdd.Global.IMG_SHOT;
-import static gdd.Global.SCALE_FACTOR;
+import static gdd.Global.*;
+import javax.swing.ImageIcon;
 
 public class Shot extends Sprite {
 
@@ -15,17 +13,25 @@ public class Shot extends Sprite {
 
     public Shot(int x, int y) {
 
-        initShot(x, y);
+        initShot(x, y, 0);
     }
 
-    private void initShot(int x, int y) {
+    public Shot(int x, int y, int level) {
 
-        var ii = new ImageIcon(IMG_SHOT);
+        initShot(x, y, level);
+    }
 
-        var scaledImage = ii.getImage().getScaledInstance(ii.getIconWidth() * SCALE_FACTOR,
-                ii.getIconHeight() * SCALE_FACTOR, 
-                java.awt.Image.SCALE_SMOOTH);
-        setImage(scaledImage);
+    private void initShot(int x, int y, int level) {
+
+        if (level < 0) {
+            level = 0;
+        }
+        if (level > IMG_VFX_SHOT.length - 1) {
+            level = IMG_VFX_SHOT.length - 1;
+        }
+
+        var ii = new ImageIcon(IMG_VFX_SHOT[level]);
+        setImage(ii.getImage());
 
         setX(x + H_SPACE);
         setY(y + V_SPACE);

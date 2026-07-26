@@ -6,18 +6,42 @@ import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 
 public class Player extends Sprite {
 
     private static final int START_X = 40;
     private static final int START_Y = BOARD_HEIGHT / 2;
+
+    private static final int COLS = 6;
+    private static final int ROWS = 4;
+    private static final int CROP_X = 20;
+    private static final int CROP_Y = 27;
+    private static final int CROP_W = 65;
+    private static final int CROP_H = 49;
+    private static final int TARGET_H = 36;  
+    private static final int ANIM_PERIOD = 6;
+
+    // Sheet rows
+    private static final int R_LEVEL = 0;
+    private static final int R_UP = 1;
+    private static final int R_DOWN = 2;
+    private static final int R_DIAGONAL = 3;
+
+    private Image[][] frames;
+    private int animFrame = 0;
+    private int animTick = 0;
+
     private int width;
     private int dy;
     private int currentSpeed = 2;
     private int speedUpCount = 0;
     private int maxShots = 1;
     private int multiShotCount = 0;
+    private int splitShotCount = 0;
+    private int bigShotCount = 0;
 
     private Rectangle bounds = new Rectangle(175,135,17,32);
 
@@ -28,18 +52,82 @@ public class Player extends Sprite {
     }
 
     private void initPlayer() {
-        var ii = new ImageIcon(IMG_PLAYER);
+        loadFrames();
 
-        Image rotatedImage = rotateImage90(ii.getImage(), ii.getIconWidth(), ii.getIconHeight());
-
-        // Scale the image to use the global scaling factor
-        var scaledImage = rotatedImage.getScaledInstance(ii.getIconHeight() * SCALE_FACTOR,
-                ii.getIconWidth() * SCALE_FACTOR,
-                java.awt.Image.SCALE_SMOOTH);
-        setImage(scaledImage);
+        if (frames != null) {
+            setImage(frames[R_LEVEL][0]);
+        } else {
+            var ii = new ImageIcon(IMG_PLAYER);
+            Image rotatedImage = rotateImage90(ii.getImage(), ii.getIconWidth(), ii.getIconHeight());
+            var scaledImage = rotatedImage.getScaledInstance(ii.getIconHeight() * SCALE_FACTOR,
+                    ii.getIconWidth() * SCALE_FACTOR,
+                    java.awt.Image.SCALE_SMOOTH);
+            setImage(scaledImage);
+        }
 
         setX(START_X);
         setY(START_Y);
+    }
+
+    private void loadFrames() {
+        try {
+            BufferedImage sheet = ImageIO.read(new File(IMG_PLAYER_SHEET));
+            double fw = (double) sheet.getWidth() / COLS;
+            double fh = (double) sheet.getHeight() / ROWS;
+            int tw = CROP_W * TARGET_H / CROP_H;
+
+            frames = new Image[ROWS][COLS];
+            for (int r = 0; r < ROWS; r++) {
+                for (int c = 0; c < COLS; c++) {
+                    int sx = (int) Math.round(c * fw) + CROP_X;
+                    int sy = (int) Math.round(r * fh) + CROP_Y;
+                    if (sx + CROP_W > sheet.getWidth() || sy + CROP_H > sheet.getHeight()) {
+                        continue;
+                    }
+                    BufferedImage sub = sheet.getSubimage(sx, sy, CROP_W, CROP_H);
+
+                    BufferedImage out = new BufferedImage(tw, TARGET_H, BufferedImage.TYPE_INT_ARGB);
+                    Graphics2D g2 = out.createGraphics();
+                    g2.drawImage(sub, 0, 0, tw, TARGET_H, null);
+                    g2.dispose();
+                    frames[r][c] = out;
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error loading player sheet: " + e.getMessage());
+            frames = null;
+        }
+    }
+
+    private void updateFrame() {
+        if (frames == null) {
+            return;
+        }
+
+        int row = R_LEVEL;
+        int firstCol = 0;
+
+        if (dy < 0 && dx > 0) {
+            row = R_DIAGONAL;          // up and forward
+        } else if (dy > 0 && dx > 0) {
+            row = R_DIAGONAL;
+            firstCol = 2;              // down and forward
+        } else if (dy < 0) {
+            row = R_UP;
+        } else if (dy > 0) {
+            row = R_DOWN;
+        }
+
+        animTick++;
+        if (animTick >= ANIM_PERIOD) {
+            animTick = 0;
+            animFrame = (animFrame + 1) % 2;
+        }
+
+        Image img = frames[row][firstCol + animFrame];
+        if (img != null) {
+            setImage(img);
+        }
     }
 
     private Image rotateImage90(Image source, int width, int height) {
@@ -50,6 +138,13 @@ public class Player extends Sprite {
         g2d.drawImage(source, 0, 0, null);
         g2d.dispose();
         return rotated;
+    }
+
+    public void heal(int amount) {
+        health += amount;
+        if (health > maxHealth) {
+            health = maxHealth;
+        }
     }
 
     public int getSpeed() {
@@ -88,9 +183,27 @@ public class Player extends Sprite {
         multiShotCount++;
     }
 
+    public int getSplitShotCount() {
+        return splitShotCount;
+    }
+
+    public void incrementSplitShotCount() {
+        splitShotCount++;
+    }
+
+    public int getBigShotCount() {
+        return bigShotCount;
+    }
+
+    public void incrementBigShotCount() {
+        bigShotCount++;
+    }
+
     public void act() {
         y += dy;
         x += dx;
+
+        updateFrame();
 
         if (y <= 2) {
             y = 2;

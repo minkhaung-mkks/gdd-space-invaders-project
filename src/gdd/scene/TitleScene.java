@@ -103,8 +103,11 @@ public class TitleScene extends JPanel {
 
         g.setColor(Color.gray);
         g.setFont(g.getFont().deriveFont(10f));
-        g.drawString("6712164 - Min Khaung Kyaw Swar", 10, 640);
-        g.drawString("6726129 - Lwin Pyae Aung", 10, 650);
+
+        String name1 = "6712164 - Min Khaung Kyaw Swar";
+        String name2 = "6726129 - Lwin Pyae Aung";
+        g.drawString(name1, 240, 640);
+        g.drawString(name2, 240, 652);
 
         Toolkit.getDefaultToolkit().sync();
     }

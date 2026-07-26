@@ -1,11 +1,8 @@
 package gdd.sprite;
 
 import static gdd.Global.*;
-import java.awt.Color;
-import java.awt.Graphics2D;
 import java.awt.Image;
-import java.awt.RenderingHints;
-import java.awt.image.BufferedImage;
+import javax.swing.ImageIcon;
 
 public class BossProjectile extends Sprite {
 
@@ -18,6 +15,10 @@ public class BossProjectile extends Sprite {
     private final double speed;
     private int life; // frames left; -1 = lives until off-screen
     private int warn; // frames of "incoming" warning before it activates
+
+    private static final int SPIN_PERIOD = 5; // frames per crescent turn
+    private int spinFrame = 0;
+    private int spinTick = 0;
 
     public BossProjectile(Kind kind, int x, int y, double vx, double vy, boolean homing, int life) {
         this(kind, x, y, vx, vy, homing, life, 0);
@@ -44,30 +45,14 @@ public class BossProjectile extends Sprite {
     }
 
     private Image makeImage() {
-        int s = (kind == Kind.ROCK) ? 40 : (kind == Kind.CRESCENT ? 30 : 16);
-        BufferedImage img = new BufferedImage(s, s, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g = img.createGraphics();
-        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
         switch (kind) {
             case CRESCENT:
-                // Crescent = big disc with a smaller disc punched out
-                g.setColor(new Color(210, 100, 230));
-                g.fillOval(0, 0, s, s);
-                g.setComposite(java.awt.AlphaComposite.Clear);
-                g.fillOval(s / 3, -s / 6, s, s);
-                break;
-            case BOMB:
-                g.setColor(new Color(255, 130, 60));
-                g.fillOval(0, 0, s, s);
-                break;
+                return new ImageIcon(IMG_VFX_CRESCENT[0]).getImage();
             case ROCK:
-                g.setColor(new Color(120, 85, 60));
-                g.fillOval(0, 0, s, s);
-                break;
+                return new ImageIcon(IMG_VFX_METEOR).getImage();
+            default:
+                return new ImageIcon(IMG_VFX_BOSS_BOMB).getImage();
         }
-        g.dispose();
-        return img;
     }
 
     // Re-aim toward the player each frame
@@ -94,6 +79,15 @@ public class BossProjectile extends Sprite {
 
         x += (int) Math.round(vx);
         y += (int) Math.round(vy);
+
+        if (kind == Kind.CRESCENT) {
+            spinTick++;
+            if (spinTick >= SPIN_PERIOD) {
+                spinTick = 0;
+                spinFrame = (spinFrame + 1) % IMG_VFX_CRESCENT.length;
+                setImage(new ImageIcon(IMG_VFX_CRESCENT[spinFrame]).getImage());
+            }
+        }
 
         if (life > 0) {
             life--;

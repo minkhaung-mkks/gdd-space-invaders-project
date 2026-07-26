@@ -72,8 +72,7 @@ public class Alien1 extends Enemy {
             this.x = x;
             this.y = y;
 
-            var bombImg = "src/images/bomb.png";
-            var ii = new ImageIcon(bombImg);
+            var ii = new ImageIcon(IMG_VFX_ALIEN_BOMB);
             setImage(ii.getImage());
         }
         public void setDestroyed(boolean destroyed) {

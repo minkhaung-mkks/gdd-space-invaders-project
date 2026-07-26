@@ -15,3 +15,10 @@
 120,Mage,716,200
 420,Mage,716,350
 750,Boss,716,250
+150,PowerUp-SplitShot,716,450
+275,PowerUp-BigShot,716,200
+480,PowerUp-SplitShot,716,150
+620,PowerUp-BigShot,716,400
+330,PowerUp-Heal,716,500
+540,PowerUp-Heal,716,250
+710,PowerUp-Heal,716,350

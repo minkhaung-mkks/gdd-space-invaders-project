@@ -8,11 +8,8 @@ public class MultiShot extends PowerUp {
 
     public MultiShot(int x, int y) {
         super(x, y);
-        ImageIcon ii = new ImageIcon(IMG_SHOT);
-        var scaledImage = ii.getImage().getScaledInstance(ii.getIconWidth() * SCALE_FACTOR,
-                ii.getIconHeight() * SCALE_FACTOR,
-                java.awt.Image.SCALE_SMOOTH);
-        setImage(scaledImage);
+        ImageIcon ii = new ImageIcon(IMG_POWERUP_MULTI);
+        setImage(ii.getImage());
     }
 
     public void act() {

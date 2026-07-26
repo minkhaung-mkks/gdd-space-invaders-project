@@ -31,13 +31,48 @@ public class Global {
     // Images
     public static final String IMG_ENEMY = "src/images/alien.png";
     public static final String IMG_PLAYER = "src/images/player.png";
+    public static final String IMG_PLAYER_SHEET = "src/images/player_sheet.png";
     public static final String IMG_SHOT = "src/images/shot.png";
     public static final String IMG_EXPLOSION = "src/images/explosion.png";
     public static final String IMG_TITLE = "src/images/title.jpg";
-    public static final String IMG_POWERUP_SPEEDUP = "src/images/powerup-s.png";
+    public static final String IMG_POWERUP_SPEEDUP = "src/images/powerup_speed.png";
+    public static final String IMG_POWERUP_SPLIT = "src/images/powerup_split.png";
+    public static final String IMG_POWERUP_BIG = "src/images/powerup_big.png";
+    public static final String IMG_POWERUP_MULTI = "src/images/powerup_multi.png";
+    public static final String IMG_POWERUP_HEAL = "src/images/powerup_heal.png";
     public static final String IMG_MAGE = "src/images/mage.png";
     public static final String IMG_ALIEN1_SHEET = "src/images/alien1_packed.png";
+
     public static final String IMG_BOSS = "src/images/boss_packed.png";
+
+    public static final String IMG_VFX_BOSS_BOMB = "src/images/boss_bomb.png";
+    public static final String IMG_VFX_METEOR = "src/images/meteor.png";
+    public static final String IMG_VFX_MAGE_FIREBALL = "src/images/mage_fireball.png";
+    public static final String IMG_VFX_ALIEN_BOMB = "src/images/alien_bomb.png";
+
+    public static final String[] IMG_VFX_CRESCENT = {
+        "src/images/crescent_1.png",
+        "src/images/crescent_2.png",
+        "src/images/crescent_3.png"
+    };
+
+    public static final String[] IMG_VFX_EXPLOSION = {
+        "src/images/explosion_1.png",
+        "src/images/explosion_2.png",
+        "src/images/explosion_3.png"
+    };
+
+    public static final String[] IMG_VFX_SHOT = {
+        "src/images/shot_1.png",
+        "src/images/shot_2.png",
+        "src/images/shot_3.png"
+    };
+
+    public static final String[] IMG_VFX_SPLIT = {
+        "src/images/split_1.png",
+        "src/images/split_2.png",
+        "src/images/split_3.png"
+    };
 
     // Parallax background layers, far to near
     public static final String IMG_BG_BACK = "src/images/back.png";

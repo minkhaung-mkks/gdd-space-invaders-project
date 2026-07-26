@@ -5,9 +5,12 @@ import gdd.Game;
 import static gdd.Global.*;
 import gdd.LevelLoader;
 import gdd.SpawnDetails;
+import gdd.powerup.BigShot;
+import gdd.powerup.Heal;
 import gdd.powerup.MultiShot;
 import gdd.powerup.PowerUp;
 import gdd.powerup.SpeedUp;
+import gdd.powerup.SplitShot;
 import gdd.sprite.Alien1;
 import gdd.sprite.Alien2;
 import gdd.sprite.Boss;
@@ -18,6 +21,7 @@ import gdd.sprite.Mage;
 import gdd.sprite.MageFire;
 import gdd.sprite.Obstacle;
 import gdd.sprite.Player;
+import gdd.sprite.Satellite;
 import gdd.sprite.Shot;
 import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
@@ -48,6 +52,7 @@ public class Scene1 extends JPanel {
 
     private int frame = 0;
     private List<PowerUp> powerups;
+    private List<Satellite> satellites;
     private List<Enemy> enemies;
     private List<Explosion> explosions;
     private List<Shot> shots;
@@ -193,6 +198,7 @@ public class Scene1 extends JPanel {
 
         enemies = new ArrayList<>();
         powerups = new ArrayList<>();
+        satellites = new ArrayList<>();
         explosions = new ArrayList<>();
         shots = new ArrayList<>();
         obstacles = new ArrayList<>();
@@ -454,6 +460,13 @@ public class Scene1 extends JPanel {
         }
     }
 
+    private void drawSatellites(Graphics g) {
+
+        for (Satellite s : satellites) {
+            g.drawImage(s.getImage(), s.getX(), s.getY(), this);
+        }
+    }
+
     private void drawShot(Graphics g) {
 
         for (Shot shot : shots) {
@@ -487,6 +500,8 @@ public class Scene1 extends JPanel {
         drawPlayerHealth(g);
         drawSpeedUpTracker(g);
         drawMultiShotTracker(g);
+        drawSplitShotTracker(g);
+        drawBigShotTracker(g);
     }
 
     // Player HP as red diagonal slashes: / / / / /
@@ -544,7 +559,7 @@ public class Scene1 extends JPanel {
     private void drawMultiShotTracker(Graphics g) {
 
         Graphics2D g2d = (Graphics2D) g;
-        var ii = new ImageIcon(IMG_SHOT);
+        var ii = new ImageIcon(IMG_POWERUP_MULTI);
         Image icon = ii.getImage();
 
         int iconSize = 20;
@@ -557,6 +572,54 @@ public class Scene1 extends JPanel {
             g2d.drawImage(icon, x, startY, iconSize, iconSize, this);
 
             if (i >= player.getMultiShotCount()) {
+                Composite oldComposite = g2d.getComposite();
+                g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.75f));
+                g2d.setColor(Color.black);
+                g2d.fillRect(x, startY, iconSize, iconSize);
+                g2d.setComposite(oldComposite);
+            }
+        }
+    }
+
+    private void drawSplitShotTracker(Graphics g) {
+
+        Graphics2D g2d = (Graphics2D) g;
+        Image icon = new ImageIcon(IMG_POWERUP_SPLIT).getImage();
+
+        int iconSize = 20;
+        int startX = 190;
+        int startY = 65;
+        int gap = 25;
+
+        for (int i = 0; i < 2; i++) {
+            int x = startX + i * gap;
+            g2d.drawImage(icon, x, startY, iconSize, iconSize, this);
+
+            if (i >= player.getSplitShotCount()) {
+                Composite oldComposite = g2d.getComposite();
+                g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.75f));
+                g2d.setColor(Color.black);
+                g2d.fillRect(x, startY, iconSize, iconSize);
+                g2d.setComposite(oldComposite);
+            }
+        }
+    }
+
+    private void drawBigShotTracker(Graphics g) {
+
+        Graphics2D g2d = (Graphics2D) g;
+        Image icon = new ImageIcon(IMG_POWERUP_BIG).getImage();
+
+        int iconSize = 20;
+        int startX = 260;
+        int startY = 65;
+        int gap = 25;
+
+        for (int i = 0; i < 2; i++) {
+            int x = startX + i * gap;
+            g2d.drawImage(icon, x, startY, iconSize, iconSize, this);
+
+            if (i >= player.getBigShotCount()) {
                 Composite oldComposite = g2d.getComposite();
                 g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.75f));
                 g2d.setColor(Color.black);
@@ -614,6 +677,7 @@ public class Scene1 extends JPanel {
             drawBossShots(g);
             drawBombing(g);
             drawPlayer(g);
+            drawSatellites(g);
             drawShot(g);
             drawDashboard(g);
             drawBossBar(g);
@@ -676,6 +740,18 @@ public class Scene1 extends JPanel {
                     PowerUp multiShot = new MultiShot(sd.x, sd.y);
                     powerups.add(multiShot);
                     break;
+                case "PowerUp-SplitShot":
+                    PowerUp splitShot = new SplitShot(sd.x, sd.y);
+                    powerups.add(splitShot);
+                    break;
+                case "PowerUp-BigShot":
+                    PowerUp bigShot = new BigShot(sd.x, sd.y);
+                    powerups.add(bigShot);
+                    break;
+                case "PowerUp-Heal":
+                    PowerUp heal = new Heal(sd.x, sd.y);
+                    powerups.add(heal);
+                    break;
                 case "Obstacle":
                     obstacles.add(new Obstacle(sd.x, sd.y));
                     break;
@@ -705,9 +781,17 @@ public class Scene1 extends JPanel {
                 && hitsTerrain(player.getX(), player.getY(),
                         player.getImage().getWidth(null),
                         player.getImage().getHeight(null))) {
-            var ii = new ImageIcon(IMG_EXPLOSION);
+            var ii = new ImageIcon(IMG_VFX_EXPLOSION[0]);
             player.setImage(ii.getImage());
             player.setDying(true);
+        }
+
+        while (satellites.size() < player.getSplitShotCount()) {
+            satellites.add(new Satellite(satellites.isEmpty() ? -1 : 1));
+        }
+        for (Satellite s : satellites) {
+            s.setLevel(player.getBigShotCount());
+            s.follow(player);
         }
 
         // Power-ups
@@ -766,7 +850,7 @@ public class Scene1 extends JPanel {
                 mf.die();
                 mageShotsToRemove.add(mf);
                 if (player.isDying()) {
-                    var ii = new ImageIcon(IMG_EXPLOSION);
+                    var ii = new ImageIcon(IMG_VFX_EXPLOSION[0]);
                     player.setImage(ii.getImage());
                 }
             }
@@ -805,7 +889,7 @@ public class Scene1 extends JPanel {
                 bp.die();
                 bossShotsToRemove.add(bp);
                 if (player.isDying()) {
-                    var ii = new ImageIcon(IMG_EXPLOSION);
+                    var ii = new ImageIcon(IMG_VFX_EXPLOSION[0]);
                     player.setImage(ii.getImage());
                 }
             }
@@ -819,7 +903,7 @@ public class Scene1 extends JPanel {
                 obstacle.act();
 
                 if (obstacle.collidesWith(player)) {
-                    var ii = new ImageIcon(IMG_EXPLOSION);
+                    var ii = new ImageIcon(IMG_VFX_EXPLOSION[0]);
                     player.setImage(ii.getImage());
                     player.setDying(true);
                 }
@@ -858,7 +942,7 @@ public class Scene1 extends JPanel {
                             // Enemies that animate their own death keep their
                             // sprite; the rest swap to the explosion image.
                             if (!enemy.isDeathAnimating()) {
-                                var ii = new ImageIcon(IMG_EXPLOSION);
+                                var ii = new ImageIcon(IMG_VFX_EXPLOSION[0]);
                                 enemy.setImage(ii.getImage());
                                 explosions.add(new Explosion(enemyX, enemyY));
                             }
@@ -969,7 +1053,7 @@ public class Scene1 extends JPanel {
 
                 // Explosion sprite only on the fatal hit
                 if (player.isDying()) {
-                    var ii = new ImageIcon(IMG_EXPLOSION);
+                    var ii = new ImageIcon(IMG_VFX_EXPLOSION[0]);
                     player.setImage(ii.getImage());
                 }
             }
@@ -1014,10 +1098,16 @@ public class Scene1 extends JPanel {
 
             if (key == KeyEvent.VK_SPACE && inGame) {
                 System.out.println("Shots: " + shots.size());
-                if (shots.size() < player.getMaxShots()) {
-                    // Create a new shot and add it to the list
-                    Shot shot = new Shot(x, y);
-                    shots.add(shot);
+
+                int bullets = player.getSplitShotCount() + 1;
+
+                if (shots.size() < player.getMaxShots() * bullets) {
+                    int level = player.getBigShotCount();
+
+                    shots.add(new Shot(x, y, level));
+                    for (Satellite s : satellites) {
+                        shots.add(new Shot(x, y + s.getSide() * Satellite.OFFSET, level));
+                    }
                     AudioPlayer.playSound("src/audio/player_shoot.wav", -6f);
                 }
             }

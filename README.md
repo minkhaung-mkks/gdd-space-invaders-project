@@ -12,6 +12,6 @@ This project is based from this
 # Music used
 
 # To fix
--Tile map sucks gonna need to split top and bottom
--Fix the dashboard/ui
--Use the new title screen
+-Fix the dashboard
+-Enemy #2 needs to get a sprite or get removed.
+-Make the levels
