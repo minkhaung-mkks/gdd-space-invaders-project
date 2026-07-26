@@ -36,6 +36,16 @@ public class Global {
     public static final String IMG_TITLE = "src/images/title.png";
     public static final String IMG_POWERUP_SPEEDUP = "src/images/powerup-s.png";
     public static final String IMG_MAGE = "src/images/mage.png";
+    public static final String IMG_ALIEN1_SHEET = "src/images/alien1_packed.png";
+    public static final String IMG_BOSS = "src/images/boss_packed.png";
+
+    // Parallax background layers, far to near
+    public static final String IMG_BG_BACK = "src/images/back.png";
+    public static final String IMG_BG_FAR = "src/images/far.png";
+    public static final String IMG_BG_MID_TOP = "src/images/middle_top.png";      
+    public static final String IMG_BG_MID_BOTTOM = "src/images/middle_bottom.png";
+
+    public static final String IMG_TERRAIN_TILES = "src/images/terrain-v2.png";
 
     // Levels
     public static final String LEVEL_SCENE1_TERRAIN = "src/levels/scene1-terrain.csv";

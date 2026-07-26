@@ -33,10 +33,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
+import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import javax.swing.Timer;
@@ -54,6 +57,10 @@ public class Scene1 extends JPanel {
     private Boss boss;
     private Player player;
     // private Shot shot;
+    private Image bgBack;
+    private Image bgFar;
+    private Image bgMidFloor;   // middle_bottom.png — mountain on the floor
+    private Image bgMidCeiling; // middle_top.png — rocks on the ceiling
 
     final int BLOCKHEIGHT = 50;
     final int BLOCKWIDTH = 50;
@@ -107,6 +114,8 @@ public class Scene1 extends JPanel {
     private static final int TILE = 50;
     private static final int TERRAIN_SPEED = 2;
     private int[][] TERRAIN;
+    private Image tileRock;   
+    private Image tileStone; 
 
     private HashMap<Integer, SpawnDetails> spawnMap;
     private AudioPlayer audioPlayer;
@@ -137,6 +146,24 @@ public class Scene1 extends JPanel {
 
     private void loadTerrain() {
         TERRAIN = LevelLoader.loadGrid(LEVEL_SCENE1_TERRAIN);
+        loadTerrainTiles();
+    }
+
+    // Crop the two tiles out of the tileset sheet and scale them to TILE size
+    private void loadTerrainTiles() {
+        try {
+            BufferedImage sheet = ImageIO.read(new File(IMG_TERRAIN_TILES));
+            int half = sheet.getWidth() / 2;
+            int h = sheet.getHeight();
+            tileRock = sheet.getSubimage(0, 0, half, h)
+                    .getScaledInstance(TILE, TILE, Image.SCALE_SMOOTH);
+            tileStone = sheet.getSubimage(half, 0, half, h)
+                    .getScaledInstance(TILE, TILE, Image.SCALE_SMOOTH);
+        } catch (Exception e) {
+            System.err.println("Error loading terrain tiles: " + e.getMessage());
+            tileRock = null;
+            tileStone = null;
+        }
     }
 
     private void initBoard() {
@@ -177,6 +204,13 @@ public class Scene1 extends JPanel {
         bossShots = new ArrayList<>();
         mageShots = new ArrayList<>();
 
+        // Darken each layer 
+        bgBack = darken(IMG_BG_BACK, 0.45f);
+        bgFar = darken(IMG_BG_FAR, 0.55f);
+
+        bgMidFloor = darken(IMG_BG_MID_BOTTOM, 0.85f);
+        bgMidCeiling = darken(IMG_BG_MID_TOP, 0.85f);
+
         // for (int i = 0; i < 4; i++) {
         // for (int j = 0; j < 6; j++) {
         // var enemy = new Enemy(ALIEN_INIT_X + (ALIEN_WIDTH + ALIEN_GAP) * j,
@@ -188,66 +222,47 @@ public class Scene1 extends JPanel {
         // shot = new Shot();
     }
 
-    private void drawMap(Graphics g) {
-        // difference: far scrolls slowest, near fastest.
-        drawParallaxLayer(g, frame / 2, 2);
-        drawParallaxLayer(g, frame, 4);
-        drawParallaxLayer(g, frame * 2, 6);
+    private BufferedImage darken(String path, float amount) {
+        Image src = new ImageIcon(path).getImage();
+        int w = src.getWidth(null);
+        int h = src.getHeight(null);
+        BufferedImage bi = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2 = bi.createGraphics();
+        g2.drawImage(src, 0, 0, null);
+        g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, amount));
+        g2.setColor(Color.BLACK);
+        g2.fillRect(0, 0, w, h);
+        g2.dispose();
+        return bi;
     }
 
-    private void drawParallaxLayer(Graphics g, int scroll, int starSize) {
+    private void drawMap(Graphics g) {
+        // Three parallax layers, far to near. Farther layers scroll slower.
+        drawParallaxLayer(g, bgBack, frame, 1.0, false);          // full height
+        drawParallaxLayer(g, bgFar, frame * 2, 1.0, false);
+        drawParallaxLayer(g, bgMidCeiling, frame * 3, 0.45, true);  // ceiling rocks
+        drawParallaxLayer(g, bgMidFloor, frame * 3, 0.45, false);   // floor mountain
+    }
 
-        int scrollOffset = scroll % BLOCKWIDTH;
-
-        int baseCol = scroll / BLOCKWIDTH;
-        int colsNeeded = (BOARD_WIDTH / BLOCKWIDTH) + 2; // +2 for smooth scrolling
-
-        for (int screenCol = 0; screenCol < colsNeeded; screenCol++) {
-            int mapRow = (baseCol + screenCol) % MAP.length;
-
-            // Calculate X position for this row
-            int x = BOARD_WIDTH - ( (screenCol * BLOCKWIDTH) - scrollOffset );
-
-            // Skip if row is completely off-screen
-            if (x > BOARD_WIDTH || x < -BLOCKWIDTH) {
-                continue;
-            }
-
-            // Draw each block in this row
-            for (int col = 0; col < MAP[mapRow].length; col++) {
-                if (MAP[mapRow][col] == 1) {
-                    // Calculate Y position
-                    int y = col * BLOCKHEIGHT;
-
-                    // Draw a cluster of stars
-                    drawStarCluster(g, x, y, BLOCKWIDTH, BLOCKHEIGHT, starSize);
-                }
-            }
+    private void drawParallaxLayer(Graphics g, Image img, int scroll,
+            double heightFrac, boolean anchorTop) {
+        if (img == null) {
+            return;
+        }
+        int ih = img.getHeight(null);
+        int iw = img.getWidth(null);
+        if (ih <= 0 || iw <= 0) {
+            return;
         }
 
-    }
+        int drawH = (int) (BOARD_HEIGHT * heightFrac);
+        int tileW = iw * drawH / ih;              // keep aspect ratio
+        int offset = scroll % tileW;
+        int y = anchorTop ? 0 : (BOARD_HEIGHT - drawH);
 
-    private void drawStarCluster(Graphics g, int x, int y, int width, int height, int starSize) {
-        // Set star color to white
-        g.setColor(Color.WHITE);
-
-        // Draw multiple stars in a cluster pattern
-        // Main star (larger)
-        int centerX = x + width / 2;
-        int centerY = y + height / 2;
-        g.fillOval(centerX - starSize / 2, centerY - starSize / 2, starSize, starSize);
-
-        // Smaller surrounding stars
-        g.fillOval(centerX - 15, centerY - 10, 2, 2);
-        g.fillOval(centerX + 12, centerY - 8, 2, 2);
-        g.fillOval(centerX - 8, centerY + 12, 2, 2);
-        g.fillOval(centerX + 10, centerY + 15, 2, 2);
-
-        // Tiny stars for more detail
-        g.fillOval(centerX - 20, centerY + 5, 1, 1);
-        g.fillOval(centerX + 18, centerY - 15, 1, 1);
-        g.fillOval(centerX - 5, centerY - 18, 1, 1);
-        g.fillOval(centerX + 8, centerY + 20, 1, 1);
+        for (int x = -offset; x < BOARD_WIDTH; x += tileW) {
+            g.drawImage(img, x, y, tileW, drawH, this);
+        }
     }
 
     // Read one tile. Screen position is turned into a grid row and column.
@@ -306,12 +321,14 @@ public class Scene1 extends JPanel {
 
     private void drawTile(Graphics g, int tile, int x, int y) {
 
-        if (tile == 1) {
-            g.setColor(new Color(90, 65, 45));
-        } else {
-            g.setColor(new Color(95, 100, 110));
+        Image t = (tile == 1) ? tileRock : tileStone;
+        if (t != null) {
+            g.drawImage(t, x, y, TILE, TILE, this);
+            return;
         }
 
+        // Fallback flat colors if the tileset failed to load
+        g.setColor(tile == 1 ? new Color(90, 65, 45) : new Color(95, 100, 110));
         g.fillRect(x, y, TILE, TILE);
     }
 
@@ -724,9 +741,8 @@ public class Scene1 extends JPanel {
                 int w = enemy.getImage().getWidth(null);
                 int h = enemy.getImage().getHeight(null);
 
-                // Blocked by terrain: undo the move so it stops at the edge
-                if (hitsTerrain(enemy.getX(), enemy.getY(), w, h)) {
-                    enemy.setX(ox);
+                 if (hitsTerrain(enemy.getX(), enemy.getY(), w, h)) {
+                    enemy.setX(ox - TERRAIN_SPEED);
                     enemy.setY(oy);
                 }
 
@@ -938,6 +954,7 @@ public class Scene1 extends JPanel {
                 bomb.setDestroyed(false);
                 bomb.setX(enemy.getX());
                 bomb.setY(enemy.getY());
+                ((Alien1) enemy).notifyShoot(); // play the SHOOT animation
             }
 
             if (!bomb.isDestroyed()) {
