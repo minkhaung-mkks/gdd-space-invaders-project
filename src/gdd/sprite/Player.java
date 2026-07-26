@@ -22,6 +22,8 @@ public class Player extends Sprite {
     private Rectangle bounds = new Rectangle(175,135,17,32);
 
     public Player() {
+        health = 5;
+        maxHealth = 5;
         initPlayer();
     }
 

@@ -13,11 +13,43 @@ abstract public class Sprite {
     protected int y;
     protected int dx;
 
+    protected int health = 1;
+    protected int maxHealth = 1;
+
     public Sprite() {
         visible = true;
     }
 
     public void act() {
+    }
+
+    // Take damage; start dying when health runs out
+    public void damage(int amount) {
+        health -= amount;
+        if (health <= 0) {
+            health = 0;
+            dying = true;
+        }
+    }
+
+    public int getHealth() {
+        return health;
+    }
+
+    public int getMaxHealth() {
+        return maxHealth;
+    }
+
+    // 0.0 (dead) to 1.0 (full) — used to draw health bars
+    public double getHealthFraction() {
+        if (maxHealth <= 0) {
+            return 0;
+        }
+        return (double) health / maxHealth;
+    }
+
+    public boolean isFullHealth() {
+        return health >= maxHealth;
     }
 
     public boolean collidesWith(Sprite other) {
@@ -80,5 +112,10 @@ abstract public class Sprite {
 
     public boolean isDying() {
         return this.dying;
+    }
+
+    // True while a sprite is playing its own death animation and should not be removed yet. 
+    public boolean isDeathAnimating() {
+        return false;
     }
 }

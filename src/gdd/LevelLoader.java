@@ -21,6 +21,11 @@ public class LevelLoader {
 
             while ((line = br.readLine()) != null) {
 
+                // Skip comment and blank lines
+                if (line.isEmpty() || line.startsWith("#")) {
+                    continue;
+                }
+
                 String[] values = line.split(",");
                 int[] row = new int[values.length];
 
@@ -47,6 +52,11 @@ public class LevelLoader {
             String line;
 
             while ((line = br.readLine()) != null) {
+
+                // Skip comment and blank lines
+                if (line.isEmpty() || line.startsWith("#")) {
+                    continue;
+                }
 
                 String[] values = line.split(",");
 

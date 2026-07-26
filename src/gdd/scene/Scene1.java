@@ -10,12 +10,17 @@ import gdd.powerup.PowerUp;
 import gdd.powerup.SpeedUp;
 import gdd.sprite.Alien1;
 import gdd.sprite.Alien2;
+import gdd.sprite.Boss;
+import gdd.sprite.BossProjectile;
 import gdd.sprite.Enemy;
 import gdd.sprite.Explosion;
+import gdd.sprite.Mage;
+import gdd.sprite.MageFire;
 import gdd.sprite.Obstacle;
 import gdd.sprite.Player;
 import gdd.sprite.Shot;
 import java.awt.AlphaComposite;
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Composite;
 import java.awt.Dimension;
@@ -44,6 +49,9 @@ public class Scene1 extends JPanel {
     private List<Explosion> explosions;
     private List<Shot> shots;
     private List<Obstacle> obstacles;
+    private List<BossProjectile> bossShots;
+    private List<MageFire> mageShots;
+    private Boss boss;
     private Player player;
     // private Shot shot;
 
@@ -166,6 +174,8 @@ public class Scene1 extends JPanel {
         explosions = new ArrayList<>();
         shots = new ArrayList<>();
         obstacles = new ArrayList<>();
+        bossShots = new ArrayList<>();
+        mageShots = new ArrayList<>();
 
         // for (int i = 0; i < 4; i++) {
         // for (int j = 0; j < 6; j++) {
@@ -323,13 +333,83 @@ public class Scene1 extends JPanel {
             if (enemy.isVisible()) {
 
                 g.drawImage(enemy.getImage(), enemy.getX(), enemy.getY(), this);
+
+                // Floating health bar, only once the enemy has taken damage
+                if (!enemy.isFullHealth() && !enemy.isDying()) {
+                    int w = enemy.getImage().getWidth(null);
+                    drawHealthBar(g, enemy.getX(), enemy.getY() - 8, w, 4,
+                            enemy.getHealthFraction());
+                }
             }
 
-            if (enemy.isDying()) {
+            if (enemy.isDying() && !enemy.isDeathAnimating()) {
 
                 enemy.die();
             }
         }
+    }
+
+    private void drawMageShots(Graphics g) {
+        for (MageFire mf : mageShots) {
+            if (mf.isVisible()) {
+                g.drawImage(mf.getImage(), mf.getX(), mf.getY(), this);
+            }
+        }
+    }
+
+    private void drawBoss(Graphics g) {
+        if (boss != null && boss.isVisible()) {
+            g.drawImage(boss.getImage(), boss.getX(), boss.getY(), this);
+        }
+    }
+
+    private void drawBossShots(Graphics g) {
+        for (BossProjectile bp : bossShots) {
+            if (!bp.isVisible()) {
+                continue;
+            }
+            if (bp.isWarning()) {
+                // "!" telegraph + guide line down the column the meteor drops from
+                int mx = bp.getX() + 20;
+                g.setColor(new Color(255, 40, 40, 90));
+                g.fillRect(mx - 2, 60, 4, BOARD_HEIGHT - 60);
+                g.setColor(Color.RED);
+                g.setFont(new Font("Helvetica", Font.BOLD, 40));
+                g.drawString("!", mx - 8, 100);
+            } else {
+                g.drawImage(bp.getImage(), bp.getX(), bp.getY(), this);
+            }
+        }
+    }
+
+    // Boss name + full-width health bar across the top
+    private void drawBossBar(Graphics g) {
+        if (boss == null || !boss.isVisible()) {
+            return;
+        }
+        int bw = BOARD_WIDTH - 120;
+        int bx = 60;
+        int by = 25;
+
+        g.setColor(Color.white);
+        g.setFont(new Font("Helvetica", Font.BOLD, 14));
+        int nameW = g.getFontMetrics().stringWidth(Boss.NAME);
+        g.drawString(Boss.NAME, (BOARD_WIDTH - nameW) / 2, by - 5);
+
+        drawHealthBar(g, bx, by, bw, 14, boss.getHealthFraction());
+    }
+
+    // Generic bar: dark background, green-to-red fill by fraction
+    private void drawHealthBar(Graphics g, int x, int y, int w, int h, double frac) {
+        if (frac < 0) {
+            frac = 0;
+        }
+        g.setColor(Color.DARK_GRAY);
+        g.fillRect(x, y, w, h);
+        g.setColor(frac > 0.5 ? Color.GREEN : (frac > 0.25 ? Color.ORANGE : Color.RED));
+        g.fillRect(x, y, (int) (w * frac), h);
+        g.setColor(Color.BLACK);
+        g.drawRect(x, y, w, h);
     }
 
     private void drawPowreUps(Graphics g) {
@@ -392,8 +472,36 @@ public class Scene1 extends JPanel {
         g.drawString("Speed: " + player.getSpeed(), 10, 40);
         g.drawString("Shots: " + player.getMaxShots(), 10, 55);
 
+        drawPlayerHealth(g);
         drawSpeedUpTracker(g);
         drawMultiShotTracker(g);
+    }
+
+    // Player HP as red diagonal slashes: / / / / /
+    private void drawPlayerHealth(Graphics g) {
+        Graphics2D g2 = (Graphics2D) g;
+
+        g.setColor(Color.white);
+        g.drawString("HP", 10, 102);
+
+        int startX = 35;
+        int top = 90;
+        int height = 14;
+        int slotGap = 12;
+
+        Composite old = g2.getComposite();
+        g2.setStroke(new BasicStroke(4));
+        for (int i = 0; i < player.getMaxHealth(); i++) {
+            int x = startX + i * slotGap;
+            if (i < player.getHealth()) {
+                g2.setColor(Color.RED);
+            } else {
+                g2.setColor(new Color(70, 70, 70));
+            }
+            g2.drawLine(x, top + height, x + 8, top); // diagonal "/"
+        }
+        g2.setStroke(new BasicStroke(1));
+        g2.setComposite(old);
     }
 
     private void drawSpeedUpTracker(Graphics g) {
@@ -432,7 +540,7 @@ public class Scene1 extends JPanel {
         int startY = 65;
         int gap = 25;
 
-        for (int i = 0; i < 2; i++) {
+        for (int i = 0; i < 4; i++) {
             int x = startX + i * gap;
             g2d.drawImage(icon, x, startY, iconSize, iconSize, this);
 
@@ -489,10 +597,14 @@ public class Scene1 extends JPanel {
             drawExplosions(g);
             drawPowreUps(g);
             drawAliens(g);
+            drawMageShots(g);
+            drawBoss(g);
+            drawBossShots(g);
             drawBombing(g);
             drawPlayer(g);
             drawShot(g);
             drawDashboard(g);
+            drawBossBar(g);
 
         } else {
 
@@ -555,6 +667,12 @@ public class Scene1 extends JPanel {
                 case "Obstacle":
                     obstacles.add(new Obstacle(sd.x, sd.y));
                     break;
+                case "Boss":
+                    boss = new Boss(sd.x, sd.y);
+                    break;
+                case "Mage":
+                    enemies.add(new Mage(sd.x, sd.y));
+                    break;
                 default:
                     System.out.println("Unknown enemy type: " + sd.type);
                     break;
@@ -590,12 +708,98 @@ public class Scene1 extends JPanel {
             }
         }
 
-        // Enemies
+        // Enemies — stopped by terrain, despawned once off screen.
+        List<Enemy> enemiesToRemove = new ArrayList<>();
         for (Enemy enemy : enemies) {
             if (enemy.isVisible()) {
+                int ox = enemy.getX();
+                int oy = enemy.getY();
                 enemy.act(direction);
+
+                // Collect any projectiles a Mage fired this frame
+                if (enemy instanceof Mage) {
+                    mageShots.addAll(((Mage) enemy).takeProjectiles());
+                }
+
+                int w = enemy.getImage().getWidth(null);
+                int h = enemy.getImage().getHeight(null);
+
+                // Blocked by terrain: undo the move so it stops at the edge
+                if (hitsTerrain(enemy.getX(), enemy.getY(), w, h)) {
+                    enemy.setX(ox);
+                    enemy.setY(oy);
+                }
+
+                // Despawn once fully off the left of the screen
+                if (enemy.getX() + w < 0) {
+                    enemy.die();
+                }
+            }
+
+            if (!enemy.isVisible()) {
+                enemiesToRemove.add(enemy);
             }
         }
+        enemies.removeAll(enemiesToRemove);
+
+        // Mage projectiles: move and hit the player
+        List<MageFire> mageShotsToRemove = new ArrayList<>();
+        for (MageFire mf : mageShots) {
+            if (!mf.isVisible()) {
+                mageShotsToRemove.add(mf);
+                continue;
+            }
+            mf.act();
+            if (player.isVisible() && !player.isDying() && mf.collidesWith(player)) {
+                player.damage(1);
+                mf.die();
+                mageShotsToRemove.add(mf);
+                if (player.isDying()) {
+                    var ii = new ImageIcon(IMG_EXPLOSION);
+                    player.setImage(ii.getImage());
+                }
+            }
+        }
+        mageShots.removeAll(mageShotsToRemove);
+
+        // Boss
+        if (boss != null && boss.isVisible()) {
+            boss.update(player.getX(), player.getY());
+            bossShots.addAll(boss.takeProjectiles());
+
+            if (boss.isDying()) {
+                boss.die();
+                explosions.add(new Explosion(boss.getX() + 40, boss.getY() + 40));
+                explosions.add(new Explosion(boss.getX() + 80, boss.getY() + 60));
+                score += 500;
+                inGame = false;
+                timer.stop();
+                message = boss.NAME + " defeated!";
+            }
+        }
+
+        // Boss projectiles: steer (homing), move, and hit the player
+        List<BossProjectile> bossShotsToRemove = new ArrayList<>();
+        for (BossProjectile bp : bossShots) {
+            if (!bp.isVisible()) {
+                bossShotsToRemove.add(bp);
+                continue;
+            }
+            bp.steer(player.getX(), player.getY());
+            bp.act();
+
+            if (!bp.isWarning() && player.isVisible() && !player.isDying()
+                    && bp.collidesWith(player)) {
+                player.damage(1);
+                bp.die();
+                bossShotsToRemove.add(bp);
+                if (player.isDying()) {
+                    var ii = new ImageIcon(IMG_EXPLOSION);
+                    player.setImage(ii.getImage());
+                }
+            }
+        }
+        bossShots.removeAll(bossShotsToRemove);
 
         // Obstacles
         List<Obstacle> obstaclesToRemove = new ArrayList<>();
@@ -634,15 +838,31 @@ public class Scene1 extends JPanel {
                     if (enemy.isVisible() && shot.isVisible()
                             && shot.collidesWith(enemy)) {
 
-                        var ii = new ImageIcon(IMG_EXPLOSION);
-                        enemy.setImage(ii.getImage());
-                        enemy.setDying(true);
-                        explosions.add(new Explosion(enemyX, enemyY));
-                        deaths++;
-                        score += 10;
+                        enemy.damage(1);
                         shot.die();
                         shotsToRemove.add(shot);
+
+                        // Only explode and score when the hit was fatal
+                        if (enemy.isDying()) {
+                            // Enemies that animate their own death keep their
+                            // sprite; the rest swap to the explosion image.
+                            if (!enemy.isDeathAnimating()) {
+                                var ii = new ImageIcon(IMG_EXPLOSION);
+                                enemy.setImage(ii.getImage());
+                                explosions.add(new Explosion(enemyX, enemyY));
+                            }
+                            deaths++;
+                            score += 10;
+                        }
                     }
+                }
+
+                // Shot vs boss
+                if (boss != null && boss.isVisible() && shot.isVisible()
+                        && shot.collidesWith(boss)) {
+                    boss.damage(1);
+                    shot.die();
+                    shotsToRemove.add(shot);
                 }
 
                 // Obstacles block shots
@@ -729,10 +949,14 @@ public class Scene1 extends JPanel {
             if (player.isVisible() && !bomb.isDestroyed()
                     && bomb.collidesWith(player)) {
 
-                var ii = new ImageIcon(IMG_EXPLOSION);
-                player.setImage(ii.getImage());
-                player.setDying(true);
+                player.damage(1);
                 bomb.setDestroyed(true);
+
+                // Explosion sprite only on the fatal hit
+                if (player.isDying()) {
+                    var ii = new ImageIcon(IMG_EXPLOSION);
+                    player.setImage(ii.getImage());
+                }
             }
 
             if (!bomb.isDestroyed() && bomb.getX() < 0) {
