@@ -45,7 +45,17 @@ public class Global {
     public static final String IMG_BG_MID_TOP = "src/images/middle_top.png";      
     public static final String IMG_BG_MID_BOTTOM = "src/images/middle_bottom.png";
 
-    public static final String IMG_TERRAIN_TILES = "src/images/terrain-v2.png";
+    // Terrain tiles, indexed by grid id 1..7 (0 = empty)
+    public static final String[] IMG_TERRAIN_TILES = {
+        null,                                 // 0 = empty
+        "src/images/terrain_cave_left.png",   // 1 cave block, left edge
+        "src/images/terrain_stone.png",       // 2 stone
+        "src/images/terrain_cave_upper.png",  // 3 cave upper
+        "src/images/terrain_cave_lower.png",  // 4 cave lower
+        "src/images/terrain_cave_middle.png", // 5 cave middle
+        "src/images/terrain_cave_right.png",  // 6 cave block, right edge
+        "src/images/terrain_cave_mid.png"     // 7 cave block, middle
+    };
 
     // Levels
     public static final String LEVEL_SCENE1_TERRAIN = "src/levels/scene1-terrain.csv";

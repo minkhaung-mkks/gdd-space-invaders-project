@@ -114,8 +114,7 @@ public class Scene1 extends JPanel {
     private static final int TILE = 50;
     private static final int TERRAIN_SPEED = 2;
     private int[][] TERRAIN;
-    private Image tileRock;   
-    private Image tileStone; 
+    private Image[] tiles; // tile image per grid id (index 1..7)
 
     private HashMap<Integer, SpawnDetails> spawnMap;
     private AudioPlayer audioPlayer;
@@ -149,20 +148,16 @@ public class Scene1 extends JPanel {
         loadTerrainTiles();
     }
 
-    // Crop the two tiles out of the tileset sheet and scale them to TILE size
+    // Load each terrain tile image, scaled to TILE size, indexed by grid id
     private void loadTerrainTiles() {
-        try {
-            BufferedImage sheet = ImageIO.read(new File(IMG_TERRAIN_TILES));
-            int half = sheet.getWidth() / 2;
-            int h = sheet.getHeight();
-            tileRock = sheet.getSubimage(0, 0, half, h)
-                    .getScaledInstance(TILE, TILE, Image.SCALE_SMOOTH);
-            tileStone = sheet.getSubimage(half, 0, half, h)
-                    .getScaledInstance(TILE, TILE, Image.SCALE_SMOOTH);
-        } catch (Exception e) {
-            System.err.println("Error loading terrain tiles: " + e.getMessage());
-            tileRock = null;
-            tileStone = null;
+        tiles = new Image[IMG_TERRAIN_TILES.length];
+        for (int id = 1; id < IMG_TERRAIN_TILES.length; id++) {
+            try {
+                BufferedImage img = ImageIO.read(new File(IMG_TERRAIN_TILES[id]));
+                tiles[id] = img.getScaledInstance(TILE, TILE, Image.SCALE_SMOOTH);
+            } catch (Exception e) {
+                System.err.println("Error loading tile " + id + ": " + e.getMessage());
+            }
         }
     }
 
@@ -321,14 +316,14 @@ public class Scene1 extends JPanel {
 
     private void drawTile(Graphics g, int tile, int x, int y) {
 
-        Image t = (tile == 1) ? tileRock : tileStone;
+        Image t = (tiles != null && tile >= 1 && tile < tiles.length) ? tiles[tile] : null;
         if (t != null) {
             g.drawImage(t, x, y, TILE, TILE, this);
             return;
         }
 
-        // Fallback flat colors if the tileset failed to load
-        g.setColor(tile == 1 ? new Color(90, 65, 45) : new Color(95, 100, 110));
+        // Fallback flat color if a tile image is missing
+        g.setColor(new Color(90, 65, 45));
         g.fillRect(x, y, TILE, TILE);
     }
 
