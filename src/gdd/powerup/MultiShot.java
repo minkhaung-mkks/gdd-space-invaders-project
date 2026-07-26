@@ -20,7 +20,11 @@ public class MultiShot extends PowerUp {
     }
 
     public void upgrade(Player player) {
+<<<<<<< HEAD
         if (player.getMultiShotCount() < 4) {
+=======
+        if (player.getMultiShotCount() < 2) {
+>>>>>>> 0a6a2015759d6371ac6d4d67854ff36a70f23850
             player.setMaxShots(player.getMaxShots() + 1);
             player.incrementMultiShotCount();
         }
