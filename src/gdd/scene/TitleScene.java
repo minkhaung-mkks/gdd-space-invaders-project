@@ -5,7 +5,6 @@ import gdd.Game;
 import static gdd.Global.*;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Toolkit;
@@ -21,6 +20,8 @@ public class TitleScene extends JPanel {
 
     private int frame = 0;
     private Image image;
+    private int imageWidth;
+    private int imageHeight;
     private AudioPlayer audioPlayer;
     private final Dimension d = new Dimension(BOARD_WIDTH, BOARD_HEIGHT);
     private Timer timer;
@@ -64,13 +65,17 @@ public class TitleScene extends JPanel {
 
     private void initTitle() {
         var ii = new ImageIcon(IMG_TITLE);
-        image = ii.getImage();
 
+        // The title art is a wide image, so shrink it to the board width and
+        // keep the aspect ratio, so the whole picture stays visible
+        imageWidth = BOARD_WIDTH;
+        imageHeight = ii.getIconHeight() * BOARD_WIDTH / ii.getIconWidth();
+        image = ii.getImage().getScaledInstance(imageWidth, imageHeight, Image.SCALE_SMOOTH);
     }
 
     private void initAudio() {
         try {
-            String filePath = "src/audio/title.wav";
+            String filePath = "src/audio/title_final.wav";
             audioPlayer = new AudioPlayer(filePath);
 
             audioPlayer.play();
@@ -92,32 +97,14 @@ public class TitleScene extends JPanel {
         g.setColor(Color.black);
         g.fillRect(0, 0, d.width, d.height);
 
-        g.setColor(Color.white);
-        g.setFont(g.getFont().deriveFont(Font.BOLD, 48f));
-        String title = "SPACE SHOOTER";
-        int titleWidth = g.getFontMetrics().stringWidth(title);
-        g.drawString(title, (d.width - titleWidth) / 2, d.height / 2 - 40);
-
-        g.drawRect(40, d.height / 2 - 100, d.width - 80, 160);
-
-        if (frame % 60 < 30) {
-            g.setColor(Color.red);
-        } else {
-            g.setColor(Color.white);
-        }
-
-        g.setFont(g.getFont().deriveFont(32f));
-        String text = "Press SPACE to Start";
-        int stringWidth = g.getFontMetrics().stringWidth(text);
-        int x = (d.width - stringWidth) / 2;
-        // int stringHeight = g.getFontMetrics().getAscent();
-        // int y = (d.height + stringHeight) / 2;
-        g.drawString(text, x, 600);
+        // Whole title art, centered on the black background.
+        // The game title and the "press space" text are part of the image.
+        g.drawImage(image, (d.width - imageWidth) / 2, (d.height - imageHeight) / 2, this);
 
         g.setColor(Color.gray);
         g.setFont(g.getFont().deriveFont(10f));
         g.drawString("6712164 - Min Khaung Kyaw Swar", 10, 640);
-        g.drawString("6xxxxx - Lwin Pyae Aung", 10, 650);
+        g.drawString("6726129 - Lwin Pyae Aung", 10, 650);
 
         Toolkit.getDefaultToolkit().sync();
     }

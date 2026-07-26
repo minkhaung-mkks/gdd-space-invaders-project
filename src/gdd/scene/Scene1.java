@@ -131,7 +131,7 @@ public class Scene1 extends JPanel {
 
     private void initAudio() {
         try {
-            String filePath = "src/audio/scene1.wav";
+            String filePath = "src/audio/scene1_final.wav";
             audioPlayer = new AudioPlayer(filePath);
             audioPlayer.play();
         } catch (Exception e) {
@@ -862,6 +862,7 @@ public class Scene1 extends JPanel {
                                 enemy.setImage(ii.getImage());
                                 explosions.add(new Explosion(enemyX, enemyY));
                             }
+                            AudioPlayer.playSound("src/audio/alien_dead.wav", 0f);
                             deaths++;
                             score += 10;
                         }
@@ -950,6 +951,8 @@ public class Scene1 extends JPanel {
                 bomb.setX(enemy.getX());
                 bomb.setY(enemy.getY());
                 ((Alien1) enemy).notifyShoot(); // play the SHOOT animation
+                // fired often, so keep it quieter than the music
+                AudioPlayer.playSound("src/audio/alien_shoot.wav", -8f);
             }
 
             if (!bomb.isDestroyed()) {
@@ -1015,6 +1018,7 @@ public class Scene1 extends JPanel {
                     // Create a new shot and add it to the list
                     Shot shot = new Shot(x, y);
                     shots.add(shot);
+                    AudioPlayer.playSound("src/audio/player_shoot.wav", -6f);
                 }
             }
 

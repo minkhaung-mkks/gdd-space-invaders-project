@@ -8,6 +8,8 @@ import java.util.Scanner;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
+import javax.sound.sampled.FloatControl;
+import javax.sound.sampled.LineEvent;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
@@ -41,9 +43,33 @@ public class AudioPlayer {
         clip.loop(Clip.LOOP_CONTINUOUSLY);
     }
 
+    // Play a sound effect once, without looping. Used for explosions, shots, etc.
+    public static void playSound(String filePath, float volume) {
+        try {
+            AudioInputStream stream = AudioSystem.getAudioInputStream(
+                    new File(filePath).getAbsoluteFile());
+            Clip clip = AudioSystem.getClip();
+            clip.open(stream);
+
+            FloatControl gain = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
+            gain.setValue(volume);
+
+            // close the clip when it finishes, otherwise we run out of audio lines
+            clip.addLineListener(event -> {
+                if (event.getType() == LineEvent.Type.STOP) {
+                    clip.close();
+                }
+            });
+
+            clip.start();
+        } catch (Exception e) {
+            System.out.println("Error with playing sound.");
+        }
+    }
+
     public static void main(String[] args) {
         try {
-            String filePath = "src/audio/title.wav";
+            String filePath = "src/audio/title_final.wav";
             AudioPlayer audioPlayer = new AudioPlayer(filePath);
 
             audioPlayer.play();

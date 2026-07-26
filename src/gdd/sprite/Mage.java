@@ -1,5 +1,6 @@
 package gdd.sprite;
 
+import gdd.AudioPlayer;
 import static gdd.Global.*;
 import java.awt.Graphics2D;
 import java.awt.Image;
@@ -179,7 +180,7 @@ public class Mage extends Enemy {
         phase = Phase.WANDER;
         animFrame = 0;
         animTick = 0;
-        wanderTimer = 60 + rng.nextInt(60);    // ~1–2s of drifting, then shoot
+        wanderTimer = 30 + rng.nextInt(30);    // ~1–2s of drifting, then shoot
         vx = rng.nextInt(3) - 1;              
         vy = rng.nextInt(5) - 2;               
     }
@@ -210,6 +211,7 @@ public class Mage extends Enemy {
         int cx = x + 10;
         int cy = y + TARGET_H / 2;
         pending.add(new MageFire(cx, cy));
+        AudioPlayer.playSound("src/audio/mage_fire_ball.wav", -6f);
     }
 
     public List<MageFire> takeProjectiles() {

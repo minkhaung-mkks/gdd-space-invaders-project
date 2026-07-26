@@ -1,5 +1,6 @@
 package gdd.sprite;
 
+import gdd.AudioPlayer;
 import static gdd.Global.*;
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -12,9 +13,9 @@ import java.util.Random;
 
 public class Boss extends Enemy {
 
-    public static final String NAME = "MOTHER ADAM";
+    public static final String NAME = "MOTHER RADAM";
     private static final int MAX_HP = 50;
-    private static final int TARGET_H = 340; 
+    private static final int TARGET_H = 240;
     private static final int ANIM_PERIOD = 14;
 
     // Sheet rows
@@ -32,6 +33,7 @@ public class Boss extends Enemy {
 
     private boolean attacking = false;
     private int idleTimer = 60;
+    private int meteorSoundTimer = 0; // frames left before the meteor sound plays
     private int lastPx = 0;
     private int lastPy = 0;
 
@@ -109,6 +111,15 @@ public class Boss extends Enemy {
         lastPx = px;
         lastPy = py;
 
+        // The meteors are still warning on screen when they spawn, so wait
+        // 2 seconds before playing the falling sound
+        if (meteorSoundTimer > 0) {
+            meteorSoundTimer--;
+            if (meteorSoundTimer == 0) {
+                AudioPlayer.playSound("src/audio/meteor.wav", 0f);
+            }
+        }
+
         if (attacking) {
             if (advanceAnim(false)) {
                 fire(row);              // spawn projectiles at the end of the animation
@@ -126,6 +137,12 @@ public class Boss extends Enemy {
                 attacking = true;
                 animFrame = 0;
                 animTick = 0;
+
+                // The meteor attack has a long wind-up, so play the summon
+                // sound while the boss is charging it
+                if (row == ROW_METEOR) {
+                    AudioPlayer.playSound("src/audio/summon.wav", -2f);
+                }
             }
         }
         setImage(currentFrame());
@@ -153,6 +170,7 @@ public class Boss extends Enemy {
 
         switch (attackRow) {
             case ROW_CRESCENT: {
+                AudioPlayer.playSound("src/audio/crescent.wav", 0f);
                 double dx = lastPx - cx;
                 double dy = lastPy - cy;
                 double d = Math.max(1, Math.hypot(dx, dy));
@@ -162,16 +180,20 @@ public class Boss extends Enemy {
                 break;
             }
             case ROW_TRIPLE:
+                AudioPlayer.playSound("src/audio/boss_3_shot.wav", 0f);
                 pending.add(new BossProjectile(BossProjectile.Kind.BOMB, cx, cy, -5, -3, false, -1));
                 pending.add(new BossProjectile(BossProjectile.Kind.BOMB, cx, cy, -5, 0, false, -1));
                 pending.add(new BossProjectile(BossProjectile.Kind.BOMB, cx, cy, -5, 3, false, -1));
                 break;
             case ROW_METEOR:
+                // One sound for the whole volley, not one per rock
+                meteorSoundTimer = 120; // 2 seconds at 60 fps
                 for (int i = 0; i < 3; i++) {
                     int tx = lastPx + rng.nextInt(240) - 100;
                     tx = Math.max(0, Math.min(BOARD_WIDTH - 40, tx));
+                    // vx is 0 so the meteors drop straight down
                     pending.add(new BossProjectile(BossProjectile.Kind.ROCK,
-                            tx, -40, -1.2, 2.0, false, -1, 70));
+                            tx, -40, 0, 7.0, false, -1, 70));
                 }
                 break;
         }
