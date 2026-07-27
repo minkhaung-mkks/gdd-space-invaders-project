@@ -1,5 +1,5 @@
 # Super Copyright Invaders.
-<img src="src/images/title.jpg" height="60">
+<img src="src/images/title.jpg" height="700">
 A game made for our Game Dev Class Project with so much copyrighted assets from Bandai that the real threat is not the alien on the screen but the lawyers in Bandai Office. 
 
 - Super - from Super Robot Wars ( the goated franchise, SD Gundam wish it could be )
