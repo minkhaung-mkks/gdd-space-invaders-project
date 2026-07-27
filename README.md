@@ -25,10 +25,16 @@ A game made for our Game Dev Class Project with so much copyrighted assets from 
 | <img src="docs/powerup_multi.png" height="60"> | **Multishot** | allows you to fire faster. dzz dzz dzz ( Max: 4 ) |
 | <img src="docs/powerup_split.png" height="60"> | **Splitshot** | Summons a probe to orbit around you and shoot. Pew pew ( Max: 2 ) |
 | <img src="docs/powerup_big.png" height="60"> | **Bigshot** | Makes your shots bigger and change color. you start with a nice personality....( Max: 2 ) |
-| <img src="docs/powerup_heal.png" height="60"> | **Heal** | Patches you back up. Not that it will save you. |
+| <img src="docs/powerup_heal.png" height="60"> | **Heal** | Patches you back up. Not that it will save you.... |
 
 ## Story
-You are a normal guy tasked to fight the radam beast invasion because ~~we~~ the department of war doesn't have the ~~budget~~ means necessary to ~~animate~~ contact tekkaman and other cool superheroes and mechs. So they said why not just send someone thats easier to get. Usually these beasts are called the sourge of the universe and the plague upon worlds but hey you are john, and John have nothing to live for so why not try taking out the aliens and get a nice death. You won't return even if you win because we can only supply you enough fuel for a oneway trip. Good luck have fun! 
+You are a normal guy tasked to fight the radam beast invasion because ~~we~~ the department of war doesn't have the ~~budget~~ means necessary to ~~animate~~ contact tekkaman and other cool superheroes and mechs. So they said why not just send someone thats easier to get. 
+
+Usually these beasts are called the sourge of the universe and the plague upon worlds but hey you are john, and John have nothing to live for so why not try taking out the aliens and get a nice death. 
+
+You won't return even if you win because we can only supply you enough fuel for a oneway trip. 
+
+Good luck have fun! 
 
 ## Characters
 
