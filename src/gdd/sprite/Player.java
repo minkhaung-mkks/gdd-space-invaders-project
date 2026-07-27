@@ -43,6 +43,11 @@ public class Player extends Sprite {
     private int splitShotCount = 0;
     private int bigShotCount = 0;
 
+    // Time after being hit where nothing can hurt the ship again
+    private static final int INVINCIBLE_FRAMES = 90; // 1.5 seconds at 60 fps
+    private static final int BLINK_PERIOD = 6;       // frames per flash
+    private int invincible = 0;
+
     private Rectangle bounds = new Rectangle(175,135,17,32);
 
     public Player() {
@@ -140,6 +145,25 @@ public class Player extends Sprite {
         return rotated;
     }
 
+    // Ignore hits while the ship is still flashing from the last one
+    @Override
+    public void damage(int amount) {
+        if (invincible > 0) {
+            return;
+        }
+        super.damage(amount);
+        invincible = INVINCIBLE_FRAMES;
+    }
+
+    public boolean isInvincible() {
+        return invincible > 0;
+    }
+
+    // The scene skips drawing the ship on the off part of each flash
+    public boolean isFlashedOff() {
+        return invincible > 0 && (invincible / BLINK_PERIOD) % 2 == 1;
+    }
+
     public void heal(int amount) {
         health += amount;
         if (health > maxHealth) {
@@ -202,6 +226,10 @@ public class Player extends Sprite {
     public void act() {
         y += dy;
         x += dx;
+
+        if (invincible > 0) {
+            invincible--;
+        }
 
         updateFrame();
 

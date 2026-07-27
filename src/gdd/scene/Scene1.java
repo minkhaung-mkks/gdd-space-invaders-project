@@ -78,7 +78,19 @@ public class Scene1 extends JPanel {
     private int score = 0;
 
     private boolean inGame = true;
+    private boolean won = false;
+    private int winPage = 0;
     private String message = "Game Over";
+
+    private static final int WIPE_SLOW = 72; // 1.2s, starting the level and the endings
+    private static final int WIPE_PAGE = 30; // 0.5s, between ending pictures
+
+    private int wipeIn = WIPE_SLOW;      // black clearing away
+    private int wipeInSpan = WIPE_SLOW;  // how long that fade lasts
+    private int wipeOut = 0;             // screen going black
+    private int wipeOutSpan = WIPE_SLOW;
+    private boolean endPending = false;  
+    private boolean toTitle = false;    
 
     private final Dimension d = new Dimension(BOARD_WIDTH, BOARD_HEIGHT);
     private final Random randomizer = new Random();
@@ -119,6 +131,7 @@ public class Scene1 extends JPanel {
     // Terrain tile grid.
     private static final int TILE = 50;
     private static final int TERRAIN_SPEED = 2;
+    private static final int TERRAIN_PUSH = 6; // how hard the cave shoves the ship
     private int[][] TERRAIN;
     private Image[] tiles; // tile image per grid id (index 1..7)
 
@@ -136,8 +149,12 @@ public class Scene1 extends JPanel {
     }
 
     private void initAudio() {
+        playMusic("src/audio/scene1_final.wav");
+    }
+
+    // Music loops until something stops it
+    private void playMusic(String filePath) {
         try {
-            String filePath = "src/audio/scene1_final.wav";
             audioPlayer = new AudioPlayer(filePath);
             audioPlayer.play();
         } catch (Exception e) {
@@ -172,7 +189,9 @@ public class Scene1 extends JPanel {
     }
 
     public void start() {
-        addKeyListener(new TAdapter());
+        if (getKeyListeners().length == 0) {
+            addKeyListener(new TAdapter());
+        }
         setFocusable(true);
         requestFocusInWindow();
         setBackground(Color.black);
@@ -180,12 +199,17 @@ public class Scene1 extends JPanel {
         timer = new Timer(1000 / 60, new GameCycle());
         timer.start();
 
+        resetState();
         gameInit();
         initAudio();
     }
 
     public void stop() {
         timer.stop();
+        stopMusic();
+    }
+
+    private void stopMusic() {
         try {
             if (audioPlayer != null) {
                 audioPlayer.stop();
@@ -193,6 +217,16 @@ public class Scene1 extends JPanel {
         } catch (Exception e) {
             System.err.println("Error closing audio player.");
         }
+    }
+
+    private void endGame(boolean win) {
+        if (endPending || !inGame) {
+            return;
+        }
+        won = win;
+        endPending = true;
+        wipeOut = WIPE_SLOW;
+        wipeOutSpan = WIPE_SLOW;
     }
 
     private void gameInit() {
@@ -456,7 +490,8 @@ public class Scene1 extends JPanel {
 
     private void drawPlayer(Graphics g) {
 
-        if (player.isVisible()) {
+        // Skipped on the off part of each flash, so the ship blinks after a hit
+        if (player.isVisible() && !player.isFlashedOff()) {
 
             g.drawImage(player.getImage(), player.getX(), player.getY(), this);
         }
@@ -464,6 +499,11 @@ public class Scene1 extends JPanel {
     }
 
     private void drawSatellites(Graphics g) {
+
+        // The pods blink along with the ship
+        if (player.isFlashedOff()) {
+            return;
+        }
 
         for (Satellite s : satellites) {
             g.drawImage(s.getImage(), s.getX(), s.getY(), this);
@@ -694,37 +734,112 @@ public class Scene1 extends JPanel {
 
         } else {
 
-            if (timer.isRunning()) {
-                timer.stop();
-            }
-
-            gameOver(g);
+            endScreen(g);
         }
+
+        drawWipe(g);
 
         Toolkit.getDefaultToolkit().sync();
     }
 
-    private void gameOver(Graphics g) {
+    // Black sheet over everything, thickest at the start of a fade
+    private void drawWipe(Graphics g) {
 
-        g.setColor(Color.black);
-        g.fillRect(0, 0, BOARD_WIDTH, BOARD_HEIGHT);
+        int cover = 0;
+        if (wipeIn > 0) {
+            cover = 255 * wipeIn / wipeInSpan;
+        }
+        if (wipeOut > 0) {
+            cover = 255 * (wipeOutSpan - wipeOut) / wipeOutSpan;
+        }
+        if (cover <= 0) {
+            return;
+        }
 
-        g.setColor(new Color(0, 32, 48));
-        g.fillRect(50, BOARD_WIDTH / 2 - 30, BOARD_WIDTH - 100, 50);
-        g.setColor(Color.white);
-        g.drawRect(50, BOARD_WIDTH / 2 - 30, BOARD_WIDTH - 100, 50);
+        Graphics2D g2 = (Graphics2D) g;
+        Composite old = g2.getComposite();
+        g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, cover / 255f));
+        g2.setColor(Color.black);
+        g2.fillRect(0, 0, BOARD_WIDTH, BOARD_HEIGHT);
+        g2.setComposite(old);
+    }
 
-        var small = new Font("Helvetica", Font.BOLD, 14);
-        var fontMetrics = this.getFontMetrics(small);
+    // Shown once the game is over: the ending pages if the boss went down,
+    // the game over picture if the ship did
+    private void endScreen(Graphics g) {
 
-        g.setColor(Color.white);
-        g.setFont(small);
-        g.drawString(message, (BOARD_WIDTH - fontMetrics.stringWidth(message)) / 2,
-                BOARD_WIDTH / 2);
+        String path = won ? IMG_GAME_WIN[winPage] : IMG_GAME_OVER;
+        var ii = new ImageIcon(path);
+
+        g.drawImage(ii.getImage(), 0, 0, BOARD_WIDTH, BOARD_HEIGHT, this);
+    }
+
+    // Back to how things were before the level started
+    private void resetState() {
+
+        inGame = true;
+        won = false;
+        winPage = 0;
+
+        frame = 0;
+        deaths = 0;
+        score = 0;
+        deathTimer = 0;
+        boss = null;
+        message = "Game Over";
+
+        wipeIn = WIPE_SLOW;
+        wipeInSpan = WIPE_SLOW;
+        wipeOut = 0;
+        wipeOutSpan = WIPE_SLOW;
+        endPending = false;
+        toTitle = false;
+    }
+
+    // Start the level again from the beginning
+    private void restart() {
+
+        resetState();
+        gameInit(); // fresh lists and a new ship
+        initAudio(); // the game over jingle stopped the level music
+
+        timer.start();
+        requestFocusInWindow();
     }
 
     private void update() {
 
+        if (wipeIn > 0) {
+            wipeIn--;
+        }
+        if (wipeOut > 0) {
+            wipeOut--;
+            if (wipeOut == 0) {
+                if (endPending) {
+                    endPending = false;
+                    inGame = false;
+                    wipeIn = WIPE_SLOW;
+                    wipeInSpan = WIPE_SLOW;
+
+                    stopMusic();
+                    if (won) {
+                        playMusic("src/audio/win.wav"); // keeps going through the ending
+                    } else {
+                        AudioPlayer.playSound("src/audio/game_over.wav", 0f);
+                    }
+                } else if (toTitle) {
+                    toTitle = false;
+                    stop();
+                    game.loadTitle();
+                }
+            }
+        }
+
+        // Everything stands still while the screen fades to the end picture,
+        // and stays still once that picture is up
+        if (endPending || !inGame) {
+            return;
+        }
 
         // Check enemy spawn
         SpawnDetails sd = spawnMap.get(frame);
@@ -777,20 +892,26 @@ public class Scene1 extends JPanel {
         }
 
         if (deaths == NUMBER_OF_ALIENS_TO_DESTROY) {
-            inGame = false;
-            timer.stop();
             message = "Game won!";
+            endGame(true);
         }
 
         // player
         player.act();
 
-        // Terrain collision: player vs ground/ceiling
         if (player.isVisible() && !player.isDying()
                 && hitsTerrain(player.getX(), player.getY(),
                         player.getImage().getWidth(null),
                         player.getImage().getHeight(null))) {
-            player.setDying(true);
+
+            player.damage(1);
+
+            // Push down out of the ceiling, or up out of the floor
+            int mid = player.getY() + player.getImage().getHeight(null) / 2;
+            int push = (mid < BOARD_HEIGHT / 2) ? TERRAIN_PUSH : -TERRAIN_PUSH;
+
+            player.setY(player.getY() + push);
+            player.setX(player.getX() - TERRAIN_PUSH); // knocked back a bit too
         }
 
        
@@ -798,13 +919,14 @@ public class Scene1 extends JPanel {
         if (player.isDying() && player.isVisible()) {
             explosions.add(new Explosion(player.getX(), player.getY(),
                     IMG_VFX_PLAYER_EXPLOSION));
+            AudioPlayer.playSound("src/audio/8bit_bomb_explosion.wav", 0f);
             player.die();
             deathTimer = IMG_VFX_PLAYER_EXPLOSION.length * 4;
         }
         if (deathTimer > 0) {
             deathTimer--;
             if (deathTimer == 0) {
-                inGame = false;
+                endGame(false);
             }
         }
 
@@ -894,9 +1016,8 @@ public class Scene1 extends JPanel {
                 explosions.add(new Explosion(boss.getX() + 40, boss.getY() + 40));
                 explosions.add(new Explosion(boss.getX() + 80, boss.getY() + 60));
                 score += 500;
-                inGame = false;
-                timer.stop();
                 message = boss.NAME + " defeated!";
+                endGame(true);
             }
         }
 
@@ -931,6 +1052,7 @@ public class Scene1 extends JPanel {
                         && obstacle.collidesWith(player)) {
                     explosions.add(new Explosion(obstacle.getX(), obstacle.getY(),
                             IMG_VFX_OBSTACLE_EXPLOSION));
+                    AudioPlayer.playSound("src/audio/8bit_bomb_explosion.wav", 0f);
                     obstacle.die();
                     player.damage(1);
                 }
@@ -1002,6 +1124,7 @@ public class Scene1 extends JPanel {
                         if (obstacle.isDying()) {
                             explosions.add(new Explosion(obstacle.getX(), obstacle.getY(),
                                     IMG_VFX_OBSTACLE_EXPLOSION));
+                            AudioPlayer.playSound("src/audio/8bit_bomb_explosion.wav", 0f);
                             obstacle.die();
                         }
                     }
@@ -1087,6 +1210,7 @@ public class Scene1 extends JPanel {
 
                 player.damage(1);
                 bomb.setDestroyed(true);
+                AudioPlayer.playSound("src/audio/8bit_bomb_explosion.wav", -6f);
 
                 // Explosion sprite only on the fatal hit
 
@@ -1127,6 +1251,8 @@ public class Scene1 extends JPanel {
 
                 player.damage(1);
                 bomb.setDestroyed(true);
+                // fires often, so keep it under the music
+                AudioPlayer.playSound("src/audio/8bit_bomb_explosion.wav", -6f);
             }
 
             if (!bomb.isDestroyed() && bomb.getX() < 0) {
@@ -1166,6 +1292,34 @@ public class Scene1 extends JPanel {
             int y = player.getY();
 
             int key = e.getKeyCode();
+
+            if (!inGame) {
+                if (won) {
+                    if (key == KeyEvent.VK_SPACE && wipeOut == 0) {
+                        winPage++;
+                        if (winPage >= IMG_GAME_WIN.length) {
+                            winPage = IMG_GAME_WIN.length - 1;
+                            toTitle = true;
+                            wipeOut = WIPE_SLOW;
+                            wipeOutSpan = WIPE_SLOW;
+                        } else {
+                            wipeIn = WIPE_PAGE; 
+                            wipeInSpan = WIPE_PAGE;
+                            if (winPage == IMG_GAME_WIN.length - 2){
+                                stopMusic();
+                            }
+                            if (winPage == IMG_GAME_WIN.length - 1) {
+                                AudioPlayer.playSound("src/audio/8bit_bomb_explosion.wav", 0f);
+                            }
+                            repaint();
+                        }
+                    }
+                } else if ((key == KeyEvent.VK_SPACE || key == KeyEvent.VK_R)
+                        && wipeOut == 0) {
+                    restart();
+                }
+                return;
+            }
 
             if (key == KeyEvent.VK_SPACE && inGame) {
                 System.out.println("Shots: " + shots.size());

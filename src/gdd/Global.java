@@ -32,6 +32,14 @@ public class Global {
     public static final String IMG_PLAYER = "src/images/player.png";
     public static final String IMG_PLAYER_SHEET = "src/images/player_sheet.png";
     public static final String IMG_TITLE = "src/images/title.jpg";
+    public static final String IMG_GAME_OVER = "src/images/game_over.jpg";
+
+    public static final String[] IMG_GAME_WIN = {
+        "src/images/game_win_1.jpg",
+        "src/images/game_win_2.jpg",
+        "src/images/game_win_3.jpg",
+        "src/images/game_win_4.jpg"
+    };
     public static final String IMG_POWERUP_SPEEDUP = "src/images/powerup_speed.png";
     public static final String IMG_POWERUP_SPLIT = "src/images/powerup_split.png";
     public static final String IMG_POWERUP_BIG = "src/images/powerup_big.png";
