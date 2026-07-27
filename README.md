@@ -8,6 +8,10 @@ Invaders - from Space invaders the inspiration and base project of our game dev 
 ## Control
 
 ## Powerups
+Speedup - makes your spaceship go faster..zooom zoom. ( Max:2 )
+Multishot - allows you to fire faster. dzz dzz dzz ( Max: 4 )
+Splitshot - Summons a probe to orbit around you and shoot. Pew pew ( Max: 2 )
+Bigshot - Makes your shots bigger and change color. you start with a nice personality....(Max: 2)
 
 ## Story
 
