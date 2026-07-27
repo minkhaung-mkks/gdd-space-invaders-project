@@ -1,9 +1,9 @@
 # Super Copyright Invaders.
 A game made for our Game Dev Class Project with so much copyrighted assets from Bandai that the real threat is not the alien on the screen but the lawyers in Bandai Office. 
 
-Super - from Super Robot Wars ( the goated franchise, SD Gundam wish it could be )
-Copyright - .... ( Please don't sue us TwT )
-Invaders - from Space invaders the inspiration and base project of our game dev course.
+- Super - from Super Robot Wars ( the goated franchise, SD Gundam wish it could be )
+- Copyright - .... ( Please don't sue us TwT )
+- Invaders - from Space invaders the inspiration and base project of our game dev course.
 
 ## Team Members
 - 6712164 - Min Khaung Kyaw Swar
@@ -19,7 +19,7 @@ Invaders - from Space invaders the inspiration and base project of our game dev 
 | `Space` | shoot, and interact with menu screens |
 
 ## Powerups
-| | | |
+
 |---|---|---|
 | <img src="docs/powerup_speed.png" height="60"> | **Speedup** | makes your spaceship go faster..zooom zoom. ( Max: 2 ) |
 | <img src="docs/powerup_multi.png" height="60"> | **Multishot** | allows you to fire faster. dzz dzz dzz ( Max: 4 ) |
