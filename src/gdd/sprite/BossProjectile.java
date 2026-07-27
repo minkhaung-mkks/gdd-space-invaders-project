@@ -18,7 +18,7 @@ public class BossProjectile extends Sprite {
     private int turnIn = -1;    
     private int hangFrames = 0;
 
-    private static final int SPIN_PERIOD = 5; // frames per crescent turn
+    private static final int SPIN_PERIOD = 4; // frames per crescent turn
     private int spinFrame = 0;
     private int spinTick = 0;
 

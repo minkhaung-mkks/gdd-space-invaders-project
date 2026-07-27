@@ -7,6 +7,7 @@ import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Composite;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Toolkit;
@@ -22,6 +23,12 @@ public class IntroScene extends JPanel {
 
     private static final int WIPE_FRAMES = 72; // about 1.2 seconds
     private static final int WIPE_PAGE = 30;   // 0.5s, between pages
+
+    private static final Font PROMPT_FONT = new Font("Monospaced", Font.BOLD, 16);
+    private static final String PROMPT_TEXT = "Press Space to continue";
+    private static final int PROMPT_BLINK = 30;
+
+    private int frame = 0;
 
     private int wipeIn = WIPE_FRAMES;
     private int wipeInSpan = WIPE_FRAMES;
@@ -48,6 +55,7 @@ public class IntroScene extends JPanel {
         setBackground(Color.black);
 
         page = 0;
+        frame = 0;
         wipeIn = WIPE_FRAMES;
         wipeInSpan = WIPE_FRAMES;
         wipeOut = 0;
@@ -96,12 +104,32 @@ public class IntroScene extends JPanel {
         var ii = new ImageIcon(IMG_GAME_START[page]);
         g.drawImage(ii.getImage(), 0, 0, BOARD_WIDTH, BOARD_HEIGHT, this);
 
+        drawContinuePrompt(g);
         drawWipe(g);
 
         Toolkit.getDefaultToolkit().sync();
     }
 
+    private void drawContinuePrompt(Graphics g) {
+
+        if (starting || (frame / PROMPT_BLINK) % 2 == 1) {
+            return;
+        }
+
+        g.setFont(PROMPT_FONT);
+        int w = g.getFontMetrics().stringWidth(PROMPT_TEXT);
+        int x = (BOARD_WIDTH - w) / 2;
+        int y = BOARD_HEIGHT - 230;
+
+        g.setColor(Color.black);
+        g.drawString(PROMPT_TEXT, x + 2, y + 2);
+        g.setColor(Color.yellow);
+        g.drawString(PROMPT_TEXT, x, y);
+    }
+
     private void update() {
+
+        frame++;
 
         if (wipeIn > 0) {
             wipeIn--;

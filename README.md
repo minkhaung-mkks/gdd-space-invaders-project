@@ -117,6 +117,11 @@ Various other Canva Assets
 - Copyright:Canva
 - Used for title,Gameover,Gamewon screens
 
+Parallax Backgrounds: Caves by [Admurin](https://admurin.itch.io/)  
+- https://admurin.itch.io/parallax-backgrounds-caves
+- License: CC0. 
+- Used for parralax.
+
 Super Grotoo Escape by ansimuz 
 - https://ansimuz.itch.io/super-grotto-escape-pack 
 - License: CC0. 
@@ -131,7 +136,7 @@ NES Shooter Music (5 tracks, 3 jingles) by SketchyLogic - https://opengameart.or
 - Intro Jingle for starting game
 - Warp Jingle for game over screen
 - Win Jingle for game won screen.
-- Boss intro for game story screen.
+- Venus for game story screen.
 
 ## SFX used
 Laser Fire by dklon 
@@ -171,8 +176,3 @@ bomb_explosion_8bit by Luke.RUSTLTD(www.rustltd.com)
 - https://opengameart.org/content/bombexplosion8bit 
 - License CC0. 
 - Used for bomb explosion.
-
-# To fix
-- Fix the dashboard
-- Make the levels
-- Reduce player hp to starting with 3

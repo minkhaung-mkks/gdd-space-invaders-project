@@ -143,6 +143,6 @@ public class Global {
     // Levels
     public static final String LEVEL_SCENE1_TERRAIN = "src/levels/scene1-terrain.csv";
     public static final String LEVEL_SCENE1_SPAWNS = "src/levels/scene1-spawns.csv";
-    public static final String LEVEL_SCENE2_TERRAIN = "src/levels/test-terrain.csv";
-    public static final String LEVEL_SCENE2_SPAWNS = "src/levels/test-spawns.csv";
+    public static final String LEVEL_SCENE2_TERRAIN = "src/levels/scene2-terrain.csv";
+    public static final String LEVEL_SCENE2_SPAWNS = "src/levels/scene2-spawns.csv";
 }

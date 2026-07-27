@@ -15,6 +15,7 @@ public class Game extends JFrame  {
     Scene2 scene2;
 
     private gdd.sprite.Player carriedPlayer;
+    private int carriedScore;
 
     public void setCarriedPlayer(gdd.sprite.Player p) {
         carriedPlayer = p;
@@ -22,6 +23,14 @@ public class Game extends JFrame  {
 
     public gdd.sprite.Player getCarriedPlayer() {
         return carriedPlayer;
+    }
+
+    public void setCarriedScore(int s) {
+        carriedScore = s;
+    }
+
+    public int getCarriedScore() {
+        return carriedScore;
     }
 
     public Game() {

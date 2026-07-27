@@ -138,6 +138,18 @@ public class Scene2 extends JPanel {
     private int[][] TERRAIN;
     private Image[] tiles; // tile image per grid id (index 1..7)
 
+    // The ending pages leave the left column clear under the planet
+    private static final Font PROMPT_FONT = new Font("Monospaced", Font.BOLD, 16);
+    private static final Font SCORE_FONT = new Font("Monospaced", Font.BOLD, 22);
+    private static final String PROMPT_TEXT = "Press Space to continue";
+    private static final int PROMPT_BLINK = 30;
+    private static final int END_INFO_X = 195; // middle of that clear column
+    private static final int SCORE_Y = 420;
+    private static final int PROMPT_Y = 460;
+
+    private static final Font PAUSE_FONT = new Font("Monospaced", Font.BOLD, 40);
+    private boolean paused = false;
+
     private HashMap<Integer, SpawnDetails> spawnMap;
     private AudioPlayer audioPlayer;
     private int lastRowToShow;
@@ -316,6 +328,19 @@ public class Scene2 extends JPanel {
         return TERRAIN[row][col % TERRAIN[row].length];
     }
 
+    private int ceilingBottom(int x) {
+
+        int scroll = frame * TERRAIN_SPEED;
+        int col = (scroll + x) / TILE;
+
+        int bottom = 0;
+        for (int row = 0; row < TERRAIN.length && tileAt(col, row) != 0; row++) {
+            bottom = (row + 1) * TILE;
+        }
+
+        return bottom;
+    }
+
     // True if the rectangle touches any solid tile
     private boolean hitsTerrain(int x, int y, int w, int h) {
 
@@ -395,8 +420,11 @@ public class Scene2 extends JPanel {
                 // Alien2 hangs from the ceiling on a thin thread
                 if (enemy instanceof Alien2) {
                     int cx = enemy.getX() + enemy.getImage().getWidth(null) / 2;
-                    g.setColor(Color.white);
-                    g.drawLine(cx, 0, cx, enemy.getY());
+                    int top = ceilingBottom(cx);
+                    if (top < enemy.getY()) {
+                        g.setColor(Color.white);
+                        g.drawLine(cx, top, cx, enemy.getY());
+                    }
                 }
 
                 g.drawImage(enemy.getImage(), enemy.getX(), enemy.getY(), this);
@@ -587,9 +615,53 @@ public class Scene2 extends JPanel {
             endScreen(g);
         }
 
+        if (paused) {
+            drawPauseScreen(g);
+        }
+
         drawWipe(g);
 
         Toolkit.getDefaultToolkit().sync();
+    }
+
+    private void drawPauseScreen(Graphics g) {
+
+        Graphics2D g2 = (Graphics2D) g;
+        Composite old = g2.getComposite();
+        g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.6f));
+        g2.setColor(Color.black);
+        g2.fillRect(0, 0, BOARD_WIDTH, BOARD_HEIGHT);
+        g2.setComposite(old);
+
+        String title = "PAUSED";
+        g2.setFont(PAUSE_FONT);
+        int tw = g2.getFontMetrics().stringWidth(title);
+        g2.setColor(Color.white);
+        g2.drawString(title, (BOARD_WIDTH - tw) / 2, BOARD_HEIGHT / 2);
+
+        String hint = "Press Escape to resume";
+        g2.setFont(PROMPT_FONT);
+        int hw = g2.getFontMetrics().stringWidth(hint);
+        g2.drawString(hint, (BOARD_WIDTH - hw) / 2, BOARD_HEIGHT / 2 + 40);
+    }
+
+    private void togglePause() {
+
+        paused = !paused;
+
+        try {
+            if (audioPlayer != null) {
+                if (paused) {
+                    audioPlayer.pause();
+                } else {
+                    audioPlayer.resumeAudio();
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error pausing audio: " + e.getMessage());
+        }
+
+        repaint();
     }
 
     // Black sheet over everything, thickest at the start of a fade
@@ -622,6 +694,35 @@ public class Scene2 extends JPanel {
         var ii = new ImageIcon(path);
 
         g.drawImage(ii.getImage(), 0, 0, BOARD_WIDTH, BOARD_HEIGHT, this);
+
+        if (won) {
+            drawEndInfo(g);
+        }
+    }
+
+    private void drawEndInfo(Graphics g) {
+
+        String scoreText = String.format("SCORE  %06d", score);
+        g.setFont(SCORE_FONT);
+        int sx = END_INFO_X - g.getFontMetrics().stringWidth(scoreText) / 2;
+
+        g.setColor(Color.black);
+        g.drawString(scoreText, sx + 2, SCORE_Y + 2);
+        g.setColor(Color.yellow);
+        g.drawString(scoreText, sx, SCORE_Y);
+
+        if (winPage == IMG_GAME_WIN.length - 1
+                || (frame / PROMPT_BLINK) % 2 == 1) {
+            return;
+        }
+
+        g.setFont(PROMPT_FONT);
+        int px = END_INFO_X - g.getFontMetrics().stringWidth(PROMPT_TEXT) / 2;
+
+        g.setColor(Color.black);
+        g.drawString(PROMPT_TEXT, px + 2, PROMPT_Y + 2);
+        g.setColor(Color.yellow);
+        g.drawString(PROMPT_TEXT, px, PROMPT_Y);
     }
 
     // Back to how things were before the level started
@@ -633,7 +734,7 @@ public class Scene2 extends JPanel {
 
         frame = 0;
         deaths = 0;
-        score = 0;
+        score = game.getCarriedScore(); // whatever stage 1 finished on
         deathTimer = 0;
         boss = null;
         message = "Game Over";
@@ -645,6 +746,7 @@ public class Scene2 extends JPanel {
         endPending = false;
         toTitle = false;
         stageClear = false;
+        paused = false;
     }
 
     // Start the level again from the beginning
@@ -830,9 +932,15 @@ public class Scene2 extends JPanel {
                 int w = enemy.getImage().getWidth(null);
                 int h = enemy.getImage().getHeight(null);
 
-                // Alien2 is pinned to its thread, so terrain must not shove it
-                if (!(enemy instanceof Alien2)
-                        && hitsTerrain(enemy.getX(), enemy.getY(), w, h)) {
+                if (enemy instanceof Alien2) {
+                    boolean stuck = hitsTerrain(enemy.getX(), oy, w, h);
+                    boolean rising = enemy.getY() < oy;
+
+                    if (hitsTerrain(enemy.getX(), enemy.getY(), w, h)
+                            && !(stuck && rising)) {
+                        enemy.setY(oy);
+                    }
+                } else if (hitsTerrain(enemy.getX(), enemy.getY(), w, h)) {
                     enemy.setX(ox - TERRAIN_SPEED);
                     enemy.setY(oy);
                 }
@@ -975,7 +1083,7 @@ public class Scene2 extends JPanel {
                                 AudioPlayer.playSound("src/audio/alien_dead.wav", 0f);
                             }
                             deaths++;
-                            score += 10;
+                            score += points(enemy);
                         }
                     }
                 }
@@ -1136,6 +1244,17 @@ public class Scene2 extends JPanel {
         }
     }
 
+    // What each kind of enemy is worth
+    private int points(Enemy enemy) {
+        if (enemy instanceof Mage) {
+            return 30;
+        }
+        if (enemy instanceof Alien2) {
+            return 15;
+        }
+        return 10;
+    }
+
     // Announce arriving aliens, but not once per alien in a tight wave
     private int lastIntroFrame = -1000;
 
@@ -1147,6 +1266,9 @@ public class Scene2 extends JPanel {
     }
 
     private void doGameCycle() {
+        if (paused) {
+            return;
+        }
         frame++;
         update();
         repaint();
@@ -1169,6 +1291,17 @@ public class Scene2 extends JPanel {
 
         @Override
         public void keyPressed(KeyEvent e) {
+
+            if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                if (inGame && !endPending) {
+                    togglePause();
+                }
+                return;
+            }
+
+            if (paused) {
+                return;
+            }
 
             player.keyPressed(e);
 
