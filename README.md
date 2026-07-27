@@ -19,8 +19,8 @@ A game made for our Game Dev Class Project with so much copyrighted assets from 
 | `Space` | shoot, and interact with menu screens |
 
 ## Powerups
-| | | |
-|Icon|Name|Description|
+| Icon | Name | Description |
+|---|---|---|
 | <img src="docs/powerup_speed.png" height="60"> | **Speedup** | makes your spaceship go faster..zooom zoom. ( Max: 2 ) |
 | <img src="docs/powerup_multi.png" height="60"> | **Multishot** | allows you to fire faster. dzz dzz dzz ( Max: 4 ) |
 | <img src="docs/powerup_split.png" height="60"> | **Splitshot** | Summons a probe to orbit around you and shoot. Pew pew ( Max: 2 ) |
@@ -65,9 +65,9 @@ This project is based from this
 [Space Invader](https://github.com/janbodnar/Java-Space-Invaders) repository.
 
 ## Tools used
-- Canva for creating sprite sheets manually (this was a pain TwT)
-- remove.bg to remove backgrounds from Canva sheets after saving.
-- Canva for title screen, Game Over, Game Won.
+- [Canva for creating sprite sheets manually (this was a pain TwT)](https://canva.link/nv44o1h7qqe861e)
+- [remove.bg to remove backgrounds from Canva sheets after saving.](https://www.remove.bg/)
+- [Canva for title screen, Game Over, Game Won.](https://canva.link/14a4xawg48vh2s1)
 - apple's built in CLI library to convert from other sound formats to wav.
 - Level Editor with html canvas that exports to CSV.
 - Python Scripts to cut and fix problematic vfx or terrains.
