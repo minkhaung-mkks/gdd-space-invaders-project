@@ -69,6 +69,32 @@ A giant boss that have 3 phases.
 - 2nd phase - also normal shoot a triple split shot from their mouth.
 - 3rd phase - Now also summons meteors..... Good luck!
 
+## Ending Remarks
+
+### What we loved.
+
+Honestly we were never a big fan of side scroller or arcade shooters, but making this game made us love the genre. A big thing I think is both of us put what we really loved out of our favourite games and kinda made it our own.
+
+For example: we both love fast pace action so we made the levels as hectic as possible requiring fast thinking and reflexes to dodge and make quick decisions.
+
+We also love trolling people so we would design the levels in a way that we know would infuriate the person playing.
+
+I also got a quick out of manually animating the sprites. I was literally drag and dropping body parts and effects to create my own custom animations for these monsters that was a big part of my teenage years.
+
+My friend loved the feeling of being fast so the player in this game after a speed up is blazing fast. We even put a speed up right at the start just for this purpose. It was also his idea to make the weaker enemies shots disappear when they die
+
+At end of the day this felt more like space-shooter-beat-them-up with power fantasy as the main focus.
+
+### What we learn
+
+We learn a lot of programing concepts and art concepts for sure, but I think what's gonna stick with me was the concept of negative reward or however you want to call it.
+
+Essentially we have the mage enemy which flies around the screen usually blocked by terrain or enemies to protect itself. Then fire fireballs right at you unlike the others that only shoot straight ahead. 
+
+This created a situtation where we were more inclined to choose a path without powerup or health pick up just to kill them. Because if we didn't we would get punished hard by these fireballs.
+
+# Credits
+
 ## References
 This project is based from this 
 [Space Invader](https://github.com/janbodnar/Java-Space-Invaders) repository.
