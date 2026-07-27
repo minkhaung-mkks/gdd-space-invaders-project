@@ -1,5 +1,7 @@
 # Super Copyright Invaders.
-<img src="src/images/title.jpg" height="400">
+<p align="center">
+  <img src="src/images/title.jpg" height="400" alt="Super Copyright Invaders title screen">
+</p>
 A game made for our Game Dev Class Project with so much copyrighted assets from Bandai that the real threat is not the alien on the screen but the lawyers in Bandai Office. 
 
 - Super - from Super Robot Wars ( the goated franchise, SD Gundam wish it could be )
@@ -25,7 +27,7 @@ A game made for our Game Dev Class Project with so much copyrighted assets from 
 | <img src="src/images/powerup_speed.png" height="60"> | **Speedup** | makes your spaceship go faster..zooom zoom. ( Max: 2 ) |
 | <img src="src/images/powerup_multi.png" height="60"> | **Multishot** | allows you to fire faster. dzz dzz dzz ( Max: 4 ) |
 | <img src="src/images/powerup_split.png" height="60"> | **Splitshot** | Summons a probe to orbit around you and shoot. Pew pew ( Max: 2 ) |
-| <img src="src/images/powerup_big.png" height="60"> | **Bigshot** | Makes your shots bigger and change color. you start with a nice personality....( Max: 2 ) |
+| <img src="src/images/powerup_big.png" height="60"> | **Bigshot** | Makes your shots bigger and change color. you start with a nice personality...(Max: 2) |
 | <img src="src/images/powerup_heal.png" height="60"> | **Heal** | Patches you back up. Not that it will save you.... |
 
 ## Story

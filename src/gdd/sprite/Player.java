@@ -48,12 +48,30 @@ public class Player extends Sprite {
     private static final int BLINK_PERIOD = 6;       // frames per flash
     private int invincible = 0;
 
+    private static final int KNOCK_FRAMES = 21; // 0.35s with no steering
+    private int knockFrames = 0;
+    private double kvx = 0;
+    private double kvy = 0;
+
     private Rectangle bounds = new Rectangle(175,135,17,32);
 
     public Player() {
         health = 5;
         maxHealth = 5;
         initPlayer();
+    }
+
+    // Take the upgrades earned in the previous stage. Health starts fresh.
+    public void copyUpgradesFrom(Player other) {
+        if (other == null) {
+            return;
+        }
+        this.currentSpeed = other.currentSpeed;
+        this.speedUpCount = other.speedUpCount;
+        this.maxShots = other.maxShots;
+        this.multiShotCount = other.multiShotCount;
+        this.splitShotCount = other.splitShotCount;
+        this.bigShotCount = other.bigShotCount;
     }
 
     private void initPlayer() {
@@ -164,6 +182,17 @@ public class Player extends Sprite {
         return invincible > 0 && (invincible / BLINK_PERIOD) % 2 == 1;
     }
 
+    // Bounced off the cave: downward is 1 to be shoved down, -1 to be shoved up
+    public void knockBack(int downward) {
+        knockFrames = KNOCK_FRAMES;
+        kvx = -10;
+        kvy = downward * 12;
+    }
+
+    public boolean isStunned() {
+        return knockFrames > 0;
+    }
+
     public void heal(int amount) {
         health += amount;
         if (health > maxHealth) {
@@ -224,8 +253,17 @@ public class Player extends Sprite {
     }
 
     public void act() {
-        y += dy;
-        x += dx;
+        if (knockFrames > 0) {
+            // Thrown clear of the wall — steering does nothing until it settles
+            x += (int) Math.round(kvx);
+            y += (int) Math.round(kvy);
+            kvx *= 0.82;
+            kvy *= 0.82;
+            knockFrames--;
+        } else {
+            y += dy;
+            x += dx;
+        }
 
         if (invincible > 0) {
             invincible--;

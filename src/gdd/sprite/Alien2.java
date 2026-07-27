@@ -26,6 +26,9 @@ public class Alien2 extends Enemy {
         super(x, y);
         bomb = new Bomb(x, y);
 
+        health = 3;
+        maxHealth = 3;
+
         frames = Sheet.slice(IMG_ALIEN2_SHEET, COLS, ROWS, TARGET_H, true); // flip to face left
         if (frames != null) {
             setImage(frames[R_IDLE][0]);
@@ -43,8 +46,11 @@ public class Alien2 extends Enemy {
 
     public void act(int direction) {
 
-        // Hangs from the ceiling on the spot — it never moves sideways, it only
-        // slides up and down to line itself up with the player
+        // The thread is anchored to the ceiling, and the ceiling scrolls —
+        // so it rides along with the terrain while sliding up and down
+        // to line itself up with the player
+        this.x -= 2;
+
         if (y < targetY - CHASE) {
             y += CHASE;
         } else if (y > targetY + CHASE) {

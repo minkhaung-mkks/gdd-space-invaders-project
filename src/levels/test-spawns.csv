@@ -1,0 +1,24 @@
+# frame,type,x,y
+50,PowerUp-SpeedUp,716,100
+100,PowerUp-MultiShot,716,300
+200,Alien1,800,400
+250,Alien2,600,350
+300,Alien1,730,100
+350,PowerUp-SpeedUp,716,100
+400,Alien2,640,150
+450,Obstacle,716,400
+500,Alien1,716,500
+550,Alien2,560,250
+600,PowerUp-MultiShot,716,300
+650,Obstacle,716,150
+700,Alien1,716,200
+120,Mage,716,200
+420,Mage,716,350
+750,Boss,716,250
+150,PowerUp-SplitShot,716,450
+275,PowerUp-BigShot,716,200
+480,PowerUp-SplitShot,716,150
+620,PowerUp-BigShot,716,400
+330,PowerUp-Heal,716,500
+540,PowerUp-Heal,716,250
+710,PowerUp-Heal,716,350

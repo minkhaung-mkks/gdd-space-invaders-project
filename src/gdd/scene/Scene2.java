@@ -49,7 +49,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
-public class Scene1 extends JPanel {
+public class Scene2 extends JPanel {
 
     private int frame = 0;
     private List<PowerUp> powerups;
@@ -68,8 +68,8 @@ public class Scene1 extends JPanel {
     // Four full-height layers, all 1227x700, far to near
     private Image bgBack;
     private Image bgFar;
-    private Image bgMiddle;
-    private Image bgNear;
+    private Image bgMidFloor;
+    private Image bgMidCeiling;
 
     final int BLOCKHEIGHT = 50;
     final int BLOCKWIDTH = 50;
@@ -143,7 +143,7 @@ public class Scene1 extends JPanel {
     private int lastRowToShow;
     private int firstRowToShow;
 
-    public Scene1(Game game) {
+    public Scene2(Game game) {
         this.game = game;
         // initBoard();
         // gameInit();
@@ -152,7 +152,7 @@ public class Scene1 extends JPanel {
     }
 
     private void initAudio() {
-        playMusic("src/audio/scene1_final.wav");
+        playMusic("src/audio/scene2.wav");
     }
 
     // Music loops until something stops it
@@ -166,20 +166,20 @@ public class Scene1 extends JPanel {
     }
 
     private void loadSpawnDetails() {
-        spawnMap = LevelLoader.loadSpawns(LEVEL_SCENE1_SPAWNS);
+        spawnMap = LevelLoader.loadSpawns(LEVEL_SCENE2_SPAWNS);
     }
 
     private void loadTerrain() {
-        TERRAIN = LevelLoader.loadGrid(LEVEL_SCENE1_TERRAIN);
+        TERRAIN = LevelLoader.loadGrid(LEVEL_SCENE2_TERRAIN);
         loadTerrainTiles();
     }
 
     // Load each terrain tile image, scaled to TILE size, indexed by grid id
     private void loadTerrainTiles() {
-        tiles = new Image[IMG_TERRAIN_TILES_2.length];
-        for (int id = 1; id < IMG_TERRAIN_TILES_2.length; id++) {
+        tiles = new Image[IMG_TERRAIN_TILES.length];
+        for (int id = 1; id < IMG_TERRAIN_TILES.length; id++) {
             try {
-                BufferedImage img = ImageIO.read(new File(IMG_TERRAIN_TILES_2[id]));
+                BufferedImage img = ImageIO.read(new File(IMG_TERRAIN_TILES[id]));
                 tiles[id] = img.getScaledInstance(TILE, TILE, Image.SCALE_SMOOTH);
             } catch (Exception e) {
                 System.err.println("Error loading tile " + id + ": " + e.getMessage());
@@ -245,11 +245,12 @@ public class Scene1 extends JPanel {
         bossShots = new ArrayList<>();
         mageShots = new ArrayList<>();
 
-        // This set is already dark, so it only needs a nudge on the far layers
-        bgBack = darken(IMG_BG2_BACK, 0.20f);
-        bgFar = darken(IMG_BG2_FAR, 0.10f);
-        bgMiddle = darken(IMG_BG2_MIDDLE, 0f);
-        bgNear = darken(IMG_BG2_NEAR, 0f);
+        // Darken each layer
+        bgBack = darken(IMG_BG_BACK, 0.45f);
+        bgFar = darken(IMG_BG_FAR, 0.55f);
+
+        bgMidFloor = darken(IMG_BG_MID_BOTTOM, 0.85f);
+        bgMidCeiling = darken(IMG_BG_MID_TOP, 0.85f);
 
         // for (int i = 0; i < 4; i++) {
         // for (int j = 0; j < 6; j++) {
@@ -259,6 +260,7 @@ public class Scene1 extends JPanel {
         // }
         // }
         player = new Player();
+        player.copyUpgradesFrom(game.getCarriedPlayer()); // upgrades from stage 1
         // shot = new Shot();
     }
 
@@ -279,10 +281,10 @@ public class Scene1 extends JPanel {
     private void drawMap(Graphics g) {
         // Three parallax layers, far to near. Farther layers scroll slower.
         // Nothing outruns the terrain, which scrolls at TERRAIN_SPEED
-        drawParallaxLayer(g, bgBack, frame / 2, 1.0, false);
-        drawParallaxLayer(g, bgFar, frame, 1.0, false);
-        drawParallaxLayer(g, bgMiddle, frame * 3 / 2, 1.0, false);
-        drawParallaxLayer(g, bgNear, frame * 2, 1.0, false);
+        drawParallaxLayer(g, bgBack, frame, 1.0, false);          // full height
+        drawParallaxLayer(g, bgFar, frame * 2, 1.0, false);
+        drawParallaxLayer(g, bgMidCeiling, frame * 3, 0.45, true);  // ceiling rocks
+        drawParallaxLayer(g, bgMidFloor, frame * 3, 0.45, false);   // floor mountain
     }
 
     private void drawParallaxLayer(Graphics g, Image img, int scroll,
@@ -528,7 +530,7 @@ public class Scene1 extends JPanel {
     }
 
     private void drawDashboard(Graphics g) {
-        hud.draw(g, "1", score, player, boss, this);
+        hud.draw(g, "2", score, player, boss, this);
     }
 
     private void drawExplosions(Graphics g) {
@@ -683,8 +685,7 @@ public class Scene1 extends JPanel {
                 } else if (stageClear) {
                     stageClear = false;
                     stop();
-                    game.setCarriedPlayer(player); // stage 2 keeps the upgrades
-                    game.loadScene2();
+                    game.loadTitle();
                 }
             }
         }
@@ -737,17 +738,15 @@ public class Scene1 extends JPanel {
                     break;
                 case "Boss":
                     boss = new Boss(sd.x, sd.y);
+                    stopMusic();
+                    playMusic("src/audio/BossMain.wav");
+                    AudioPlayer.playSound("src/audio/boss_voice.wav", 0f);
                     break;
                 case "Mage":
                     enemies.add(new Mage(sd.x, sd.y));
                     break;
                 case "StageEnd":
-                    // Stage timeline finished — fade out and move on
-                    if (!endPending && !stageClear) {
-                        stageClear = true;
-                        wipeOut = WIPE_SLOW;
-                        wipeOutSpan = WIPE_SLOW;
-                    }
+                    // Not used here — the boss ends this stage
                     break;
                 default:
                     System.out.println("Unknown enemy type: " + sd.type);

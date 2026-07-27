@@ -24,6 +24,9 @@ public class Alien1 extends Enemy {
         super(x, y);
         bomb = new Bomb(x, y);
 
+        health = 2;
+        maxHealth = 2;
+
         frames = Sheet.slice(IMG_ALIEN1_SHEET, COLS, ROWS, TARGET_H, true); // flip to face left
         if (frames != null) {
             setImage(frames[R_MOVE][0]);

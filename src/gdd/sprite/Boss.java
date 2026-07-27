@@ -14,8 +14,8 @@ import java.util.Random;
 public class Boss extends Enemy {
 
     public static final String NAME = "MOTHER RADAM";
-    private static final int MAX_HP = 50;
-    private static final int TARGET_H = 240;
+    private static final int MAX_HP = 160;
+    private static final int TARGET_H = 150;
     private static final int ANIM_PERIOD = 14;
 
     // Sheet rows
@@ -32,7 +32,13 @@ public class Boss extends Enemy {
     private int animTick = 0;
 
     private boolean attacking = false;
-    private int idleTimer = 60;
+    private int idleTimer = 30;
+
+    // Drifts around the right half of the screen, changing heading now and then
+    private int vx = -1;
+    private int vy = 1;
+    private int driftTimer = 0;
+
     private int meteorSoundTimer = 0; // frames left before the meteor sound plays
     private int lastPx = 0;
     private int lastPy = 0;
@@ -54,8 +60,8 @@ public class Boss extends Enemy {
 
         int w = getImage().getWidth(null);
         int h = getImage().getHeight(null);
-        // Fixed giant pinned to the right, vertically centered
-        this.x = BOARD_WIDTH - w + 40;
+        // Enters on the right, then wanders from there
+        this.x = BOARD_WIDTH - w - 20;
         this.y = (BOARD_HEIGHT - h) / 2;
     }
 
@@ -72,10 +78,10 @@ public class Boss extends Enemy {
 
     public int getPhase() {
         double f = getHealthFraction();
-        if (f > 0.66) {
+        if (f > 0.80) {
             return 1;
         }
-        if (f > 0.33) {
+        if (f > 0.50) {
             return 2;
         }
         return 3;
@@ -111,6 +117,8 @@ public class Boss extends Enemy {
         lastPx = px;
         lastPy = py;
 
+        wander();
+
         // The meteors are still warning on screen when they spawn, so wait
         // 2 seconds before playing the falling sound
         if (meteorSoundTimer > 0) {
@@ -124,7 +132,7 @@ public class Boss extends Enemy {
             if (advanceAnim(false)) {
                 fire(row);              // spawn projectiles at the end of the animation
                 attacking = false;
-                idleTimer = 45;
+                idleTimer = attackGap();
                 row = ROW_IDLE;
                 animFrame = 0;
                 animTick = 0;
@@ -146,6 +154,64 @@ public class Boss extends Enemy {
             }
         }
         setImage(currentFrame());
+    }
+
+    private void wander() {
+        if (--driftTimer <= 0) {
+            driftTimer = 90 + rng.nextInt(90);
+            vx = rng.nextInt(3) - 1;
+            vy = rng.nextInt(5) - 2;
+        }
+
+        x += vx;
+        y += vy;
+        keepInZone();
+    }
+
+    private void keepInZone() {
+        int w = getImage().getWidth(null);
+        int h = getImage().getHeight(null);
+
+        int minX = BOARD_WIDTH / 2;
+        int maxX = BOARD_WIDTH - w - 10;
+        if (x < minX) {
+            x = minX;
+            vx = -vx;
+        }
+        if (x > maxX) {
+            x = maxX;
+            vx = -vx;
+        }
+
+        if (y < 20) {
+            y = 20;
+            vy = -vy;
+        }
+        if (y > BOARD_HEIGHT - h - 20) {
+            y = BOARD_HEIGHT - h - 20;
+            vy = -vy;
+        }
+    }
+
+    // The cave is solid to her too: back out of it and turn around
+    public void blocked(int ox, int oy) {
+        x = ox;
+        y = oy;
+        vx = -vx;
+        vy = -vy;
+        driftTimer = 30 + rng.nextInt(30);
+    }
+
+    // She presses harder the more damage she has taken
+    private int attackGap() {
+        switch (getPhase()) {
+            case 1:
+                return 26;
+            case 2:
+                return 16;
+            default:
+                return 8;
+        }
     }
 
     // Pick an attack row allowed by the current phase
@@ -176,24 +242,34 @@ public class Boss extends Enemy {
                 double d = Math.max(1, Math.hypot(dx, dy));
                 double sp = 3;
                 pending.add(new BossProjectile(BossProjectile.Kind.CRESCENT,
-                        cx, cy, dx / d * sp, dy / d * sp, true, 120));
+                        cx, cy, dx / d * sp, dy / d * sp, true, 150));
                 break;
             }
             case ROW_TRIPLE:
                 AudioPlayer.playSound("src/audio/boss_3_shot.wav", 0f);
-                pending.add(new BossProjectile(BossProjectile.Kind.BOMB, cx, cy, -5, -3, false, -1));
-                pending.add(new BossProjectile(BossProjectile.Kind.BOMB, cx, cy, -5, 0, false, -1));
-                pending.add(new BossProjectile(BossProjectile.Kind.BOMB, cx, cy, -5, 3, false, -1));
+                // Fan out wide, hang in the air for a beat, then each one
+                // turns toward wherever the ship is at that instant and holds
+                // that line until it leaves the screen.
+                double aim = Math.atan2(lastPy - cy, lastPx - cx);
+                double bombSpeed = 6;
+                for (double spread : new double[] {-0.5, 0, 0.5}) {
+                    double ang = aim + spread;
+                    BossProjectile bomb = new BossProjectile(BossProjectile.Kind.BOMB,
+                            cx, cy, Math.cos(ang) * bombSpeed, Math.sin(ang) * bombSpeed,
+                            false, -1);
+                    bomb.turnAfter(60, 36); // 1s spreading, then 0.6s hanging
+                    pending.add(bomb);
+                }
                 break;
             case ROW_METEOR:
                 // One sound for the whole volley, not one per rock
-                meteorSoundTimer = 120; // 2 seconds at 60 fps
+                meteorSoundTimer = 45; // just after the warning clears
                 for (int i = 0; i < 3; i++) {
                     int tx = lastPx + rng.nextInt(240) - 100;
                     tx = Math.max(0, Math.min(BOARD_WIDTH - 40, tx));
                     // vx is 0 so the meteors drop straight down
                     pending.add(new BossProjectile(BossProjectile.Kind.ROCK,
-                            tx, -40, 0, 7.0, false, -1, 70));
+                            tx, -40, 0, 11.0, false, -1, 40));
                 }
                 break;
         }

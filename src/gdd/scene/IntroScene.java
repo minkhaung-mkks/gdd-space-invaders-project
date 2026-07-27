@@ -9,7 +9,6 @@ import java.awt.Composite;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -19,59 +18,52 @@ import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
-public class TitleScene extends JPanel {
+public class IntroScene extends JPanel {
 
-    private int frame = 0;
-    private Image image;
-    private int imageWidth;
-    private int imageHeight;
+    private static final int WIPE_FRAMES = 72; // about 1.2 seconds
+    private static final int WIPE_PAGE = 30;   // 0.5s, between pages
+
+    private int wipeIn = WIPE_FRAMES;
+    private int wipeInSpan = WIPE_FRAMES;
+    private int wipeOut = 0;
+    private boolean starting = false; // load the level once the screen is black
+
+    private int page = 0;
     private AudioPlayer audioPlayer;
+
     private final Dimension d = new Dimension(BOARD_WIDTH, BOARD_HEIGHT);
     private Timer timer;
-    private Game game;
+    private final Game game;
 
-    // Screens fade through black instead of snapping over
-    private static final int WIPE_FRAMES = 72; // about 1.2 seconds
-    private int wipeIn = WIPE_FRAMES;          // black clearing away
-    private int wipeOut = 0;                   // screen going black
-    private boolean starting = false;          // load the level once black
-
-    public TitleScene(Game game) {
+    public IntroScene(Game game) {
         this.game = game;
-        // initBoard();
-        // initTitle();
-    }
-
-    private void initBoard() {
-
     }
 
     public void start() {
-        // Only once, in case the title screen is shown again after the ending
         if (getKeyListeners().length == 0) {
             addKeyListener(new TAdapter());
         }
         setFocusable(true);
-        requestFocusInWindow(); // needed when coming back from the ending
+        requestFocusInWindow();
         setBackground(Color.black);
+
+        page = 0;
+        wipeIn = WIPE_FRAMES;
+        wipeInSpan = WIPE_FRAMES;
+        wipeOut = 0;
+        starting = false;
 
         timer = new Timer(1000 / 60, new GameCycle());
         timer.start();
 
-        wipeIn = WIPE_FRAMES;
-        wipeOut = 0;
-        starting = false;
-
-        initTitle();
         initAudio();
     }
 
     public void stop() {
+        if (timer != null) {
+            timer.stop();
+        }
         try {
-            if (timer != null) {
-                timer.stop();
-            }
-
             if (audioPlayer != null) {
                 audioPlayer.stop();
             }
@@ -80,26 +72,13 @@ public class TitleScene extends JPanel {
         }
     }
 
-    private void initTitle() {
-        var ii = new ImageIcon(IMG_TITLE);
-
-        // The title art is a wide image, so shrink it to the board width and
-        // keep the aspect ratio, so the whole picture stays visible
-        imageWidth = BOARD_WIDTH;
-        imageHeight = ii.getIconHeight() * BOARD_WIDTH / ii.getIconWidth();
-        image = ii.getImage().getScaledInstance(imageWidth, imageHeight, Image.SCALE_SMOOTH);
-    }
-
     private void initAudio() {
         try {
-            String filePath = "src/audio/title_final.wav";
-            audioPlayer = new AudioPlayer(filePath);
-
+            audioPlayer = new AudioPlayer("src/audio/Venus.wav");
             audioPlayer.play();
         } catch (Exception e) {
             System.err.println("Error with playing sound.");
         }
-
     }
 
     @Override
@@ -114,17 +93,8 @@ public class TitleScene extends JPanel {
         g.setColor(Color.black);
         g.fillRect(0, 0, d.width, d.height);
 
-        // Whole title art, centered on the black background.
-        // The game title and the "press space" text are part of the image.
-        g.drawImage(image, (d.width - imageWidth) / 2, (d.height - imageHeight) / 2, this);
-
-        g.setColor(Color.gray);
-        g.setFont(g.getFont().deriveFont(10f));
-
-        String name1 = "6712164 - Min Khaung Kyaw Swar";
-        String name2 = "6726129 - Lwin Pyae Aung";
-        g.drawString(name1, 240, 640);
-        g.drawString(name2, 240, 652);
+        var ii = new ImageIcon(IMG_GAME_START[page]);
+        g.drawImage(ii.getImage(), 0, 0, BOARD_WIDTH, BOARD_HEIGHT, this);
 
         drawWipe(g);
 
@@ -132,7 +102,6 @@ public class TitleScene extends JPanel {
     }
 
     private void update() {
-        frame++;
 
         if (wipeIn > 0) {
             wipeIn--;
@@ -141,17 +110,16 @@ public class TitleScene extends JPanel {
             wipeOut--;
             if (wipeOut == 0 && starting) {
                 starting = false;
-                game.loadIntro();
+                game.loadScene1();
             }
         }
     }
 
-    // Black sheet over everything, thickest at the start of a fade
     private void drawWipe(Graphics g) {
 
         int cover = 0;
         if (wipeIn > 0) {
-            cover = 255 * wipeIn / WIPE_FRAMES;
+            cover = 255 * wipeIn / wipeInSpan;
         }
         if (wipeOut > 0) {
             cover = 255 * (WIPE_FRAMES - wipeOut) / WIPE_FRAMES;
@@ -184,21 +152,21 @@ public class TitleScene extends JPanel {
     private class TAdapter extends KeyAdapter {
 
         @Override
-        public void keyReleased(KeyEvent e) {
-
-        }
-
-        @Override
         public void keyPressed(KeyEvent e) {
-            System.out.println("Title.keyPressed: " + e.getKeyCode());
-            int key = e.getKeyCode();
-            if (key == KeyEvent.VK_SPACE && !starting) {
+
+            if (e.getKeyCode() != KeyEvent.VK_SPACE || starting || wipeOut > 0) {
+                return;
+            }
+
+            if (page < IMG_GAME_START.length - 1) {
+                page++;
+                wipeIn = WIPE_PAGE; // fade between pages
+                wipeInSpan = WIPE_PAGE;
+            } else {
                 starting = true;
                 wipeIn = 0;
                 wipeOut = WIPE_FRAMES;
-                AudioPlayer.playSound("src/audio/game_start.wav", 0f);
             }
-
         }
     }
 }

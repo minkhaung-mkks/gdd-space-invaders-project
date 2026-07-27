@@ -33,6 +33,13 @@ public class Global {
     public static final String IMG_PLAYER_SHEET = "src/images/player_sheet.png";
     public static final String IMG_TITLE = "src/images/title.jpg";
     public static final String IMG_GAME_OVER = "src/images/game_over.jpg";
+    public static final String IMG_GAME_UI = "src/images/game-ui.png";
+
+    public static final String[] IMG_GAME_START = {
+        "src/images/game_start_1.jpg",
+        "src/images/game_start_2.jpg",
+        "src/images/game_start_3.jpg"
+    };
 
     public static final String[] IMG_GAME_WIN = {
         "src/images/game_win_1.jpg",
@@ -96,13 +103,13 @@ public class Global {
         "src/images/split_3.png"
     };
 
-    // Parallax background layers, far to near
+    // Crystal set
     public static final String IMG_BG_BACK = "src/images/back.png";
     public static final String IMG_BG_FAR = "src/images/far.png";
     public static final String IMG_BG_MID_TOP = "src/images/middle_top.png";      
     public static final String IMG_BG_MID_BOTTOM = "src/images/middle_bottom.png";
 
-    // Terrain tiles, indexed by grid id 1..7 (0 = empty)
+    // Crystal terrain tiles
     public static final String[] IMG_TERRAIN_TILES = {
         null,                                 // 0 = empty
         "src/images/terrain_cave_left.png",   // 1 cave block, left edge
@@ -114,7 +121,28 @@ public class Global {
         "src/images/terrain_cave_mid.png"     // 7 cave block, middle
     };
 
+    // Cave set
+    public static final String IMG_BG2_BACK = "src/images/back_2.png";
+    public static final String IMG_BG2_FAR = "src/images/far_2.png";
+    public static final String IMG_BG2_MIDDLE = "src/images/middle_2.png";
+    public static final String IMG_BG2_NEAR = "src/images/near_2.png";
+
+
+    public static final String[] IMG_TERRAIN_TILES_2 = {
+        null,                              // 0 = empty
+        "src/images/cave_left_2.png",      // 1 cave block, left edge
+        "src/images/cave_stone_2.png",     // 2 stone
+        "src/images/cave_upper_2.png",     // 3 cave upper
+        "src/images/cave_lower_2.png",     // 4 cave lower
+        "src/images/cave_middle_2.png",    // 5 cave middle
+        "src/images/cave_right_2.png",     // 6 cave block, right edge
+        "src/images/cave_block_2.png"      // 7 cave block, middle
+    };
+
+
     // Levels
     public static final String LEVEL_SCENE1_TERRAIN = "src/levels/scene1-terrain.csv";
     public static final String LEVEL_SCENE1_SPAWNS = "src/levels/scene1-spawns.csv";
+    public static final String LEVEL_SCENE2_TERRAIN = "src/levels/test-terrain.csv";
+    public static final String LEVEL_SCENE2_SPAWNS = "src/levels/test-spawns.csv";
 }

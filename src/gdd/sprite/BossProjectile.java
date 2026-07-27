@@ -15,6 +15,8 @@ public class BossProjectile extends Sprite {
     private final double speed;
     private int life; // frames left; -1 = lives until off-screen
     private int warn; // frames of "incoming" warning before it activates
+    private int turnIn = -1;    
+    private int hangFrames = 0;
 
     private static final int SPIN_PERIOD = 5; // frames per crescent turn
     private int spinFrame = 0;
@@ -55,11 +57,34 @@ public class BossProjectile extends Sprite {
         }
     }
 
-    // Re-aim toward the player each frame
+    public void turnAfter(int frames, int hang) {
+        this.turnIn = frames;
+        this.hangFrames = hang;
+    }
+
+    public boolean isHanging() {
+        return turnIn == 0 && hangFrames > 0;
+    }
+
     public void steer(int px, int py) {
-        if (!homing) {
+        if (turnIn >= 0) {
+            if (turnIn > 0) {
+                turnIn--;
+            } else if (hangFrames > 0) {
+                hangFrames--; 
+            } else {
+                turnIn = -1; 
+                aimAt(px, py);
+            }
             return;
         }
+
+        if (homing) {
+            aimAt(px, py);
+        }
+    }
+
+    private void aimAt(int px, int py) {
         double dx = px - x;
         double dy = py - y;
         double d = Math.hypot(dx, dy);
@@ -71,6 +96,11 @@ public class BossProjectile extends Sprite {
 
     @Override
     public void act() {
+        // Hovering
+        if (isHanging()) {
+            return;
+        }
+
         // Hold in place during the warning telegraph
         if (warn > 0) {
             warn--;

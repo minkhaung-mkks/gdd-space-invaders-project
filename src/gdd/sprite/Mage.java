@@ -25,7 +25,7 @@ public class Mage extends Enemy {
 
     private static final int TARGET_H = 96;   // scaled frame height
     private static final int ANIM_PERIOD = 6; // game frames per animation frame
-    private static final int ENTER_SPEED = 2;
+    private static final int ENTER_SPEED = 6;
 
     private Image[][] frames; 
 
@@ -46,8 +46,8 @@ public class Mage extends Enemy {
 
     public Mage(int x, int y) {
         super(x, y);
-        health = 3;
-        maxHealth = 3;
+        health = 6;
+        maxHealth = 6;
         holdX = BOARD_WIDTH - 280;
         loadFrames();
         this.x = x;
@@ -146,7 +146,11 @@ public class Mage extends Enemy {
                 row = R_MOVE;
                 x -= ENTER_SPEED;
                 if (x <= holdX) {
-                    mageMove();
+                    // Cast straight away — drifting about first made the opening
+                    // shot land much later than every one after it
+                    phase = Phase.SHOOT;
+                    animFrame = 0;
+                    animTick = 0;
                 }
                 advanceAnim(frameCount(R_MOVE), true);
                 break;
@@ -207,10 +211,19 @@ public class Mage extends Enemy {
         }
     }
 
+    // Where the player was, updated by the scene each frame
+    private int aimX = 0;
+    private int aimY = BOARD_HEIGHT / 2;
+
+    public void aim(int px, int py) {
+        aimX = px;
+        aimY = py;
+    }
+
     private void fire() {
         int cx = x + 10;
         int cy = y + TARGET_H / 2;
-        pending.add(new MageFire(cx, cy));
+        pending.add(new MageFire(cx, cy, aimX, aimY));
         AudioPlayer.playSound("src/audio/mage_fire_ball.wav", -6f);
     }
 
