@@ -19,8 +19,8 @@ A game made for our Game Dev Class Project with so much copyrighted assets from 
 | `Space` | shoot, and interact with menu screens |
 
 ## Powerups
-
-|---|---|---|
+| | | |
+|Icon|Name|Description|
 | <img src="docs/powerup_speed.png" height="60"> | **Speedup** | makes your spaceship go faster..zooom zoom. ( Max: 2 ) |
 | <img src="docs/powerup_multi.png" height="60"> | **Multishot** | allows you to fire faster. dzz dzz dzz ( Max: 4 ) |
 | <img src="docs/powerup_split.png" height="60"> | **Splitshot** | Summons a probe to orbit around you and shoot. Pew pew ( Max: 2 ) |
