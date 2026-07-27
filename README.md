@@ -98,11 +98,11 @@ For example: we both love fast pace action so we made the levels as hectic as po
 
 We also love trolling people so we would design the levels in a way that we know would infuriate the person playing.
 
-I also got a quick out of manually animating the sprites. I was literally drag and dropping body parts and effects to create my own custom animations for these monsters that was a big part of my teenage years.
+I also loved manually animating the sprites. I was literally drag and dropping body parts and effects to create my own custom animations for these monsters that was a big part of my teenage years.
 
 My friend loved the feeling of being fast so the player in this game after a speed up is blazing fast. We even put a speed up right at the start just for this purpose. It was also his idea to make the weaker enemies shots disappear when they die
 
-At end of the day this felt more like space-shooter-beat-them-up with power fantasy as the main focus.
+At end of the day this felt more like space-shooter-beat-them-up with power fantasy as the main focus. Which I guessed was the sweet spot for us.
 
 ### What we learn
 
@@ -136,6 +136,11 @@ Radam Beast (Ground) Ripped by Domobot from Super Robot Wars J
 - https://www.spriters-resource.com/game_boy_advance/srwj/asset/36949/ 
 - Original Franchise: Tekkaman. Copyright: Tatsunoko Production and Bandai Namco Entertainment.
 - Used as Alien2.
+
+Granteed Dracodeus Ripped by Black Dargon from Super Robot Wars J 
+- https://www.spriters-resource.com/game_boy_advance/srwj/asset/57186/
+- Original Franchise: Super Robot Wars. Copyright: Bandai Namco Entertainment.
+- Used as Explosion.
 
 Powerbot Ripped by Domobot from Super Robot Wars K 
 - https://www.spriters-resource.com/ds_dsi/srwk/asset/164524/ 
