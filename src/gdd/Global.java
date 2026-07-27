@@ -29,11 +29,8 @@ public class Global {
     public static final int PLAYER_HEIGHT = 20; // Doubled from 10
 
     // Images
-    public static final String IMG_ENEMY = "src/images/alien.png";
     public static final String IMG_PLAYER = "src/images/player.png";
     public static final String IMG_PLAYER_SHEET = "src/images/player_sheet.png";
-    public static final String IMG_SHOT = "src/images/shot.png";
-    public static final String IMG_EXPLOSION = "src/images/explosion.png";
     public static final String IMG_TITLE = "src/images/title.jpg";
     public static final String IMG_POWERUP_SPEEDUP = "src/images/powerup_speed.png";
     public static final String IMG_POWERUP_SPLIT = "src/images/powerup_split.png";
@@ -54,6 +51,23 @@ public class Global {
         "src/images/crescent_1.png",
         "src/images/crescent_2.png",
         "src/images/crescent_3.png"
+    };
+
+    public static final String IMG_OBSTACLE = "src/images/obstacle.png";
+    public static final String IMG_ALIEN2_SHEET = "src/images/alien_2.png";
+    public static final String IMG_VFX_ALIEN2_BOMB = "src/images/alien2_bomb.png";
+
+    public static final String[] IMG_VFX_PLAYER_EXPLOSION = {
+        "src/images/player_explosion_1.png",
+        "src/images/player_explosion_2.png",
+        "src/images/player_explosion_3.png"
+    };
+
+    public static final String[] IMG_VFX_OBSTACLE_EXPLOSION = {
+        "src/images/obstacle_explosion_1.png",
+        "src/images/obstacle_explosion_2.png",
+        "src/images/obstacle_explosion_3.png",
+        "src/images/obstacle_explosion_4.png"
     };
 
     public static final String[] IMG_VFX_EXPLOSION = {

@@ -6,7 +6,7 @@ import javax.swing.ImageIcon;
 
 public class Heal extends PowerUp {
 
-    private static final int AMOUNT = 2; // hearts given back
+    private static final int AMOUNT = 1; // hearts given back
 
     public Heal(int x, int y) {
         super(x, y);

@@ -5,32 +5,37 @@ import javax.swing.ImageIcon;
 
 public class Explosion extends Sprite {
 
-    private static final int LIFE = 12; // frames on screen, 4 per picture
+    private static final int HOLD = 4; // game frames per picture
 
+    private final String[] frames;
+
+    // The normal alien explosion
     public Explosion(int x, int y) {
 
-        initExplosion(x, y);
+        this(x, y, IMG_VFX_EXPLOSION);
     }
 
-    private void initExplosion(int x, int y) {
+    // A different set of pictures, for the player and for obstacles
+    public Explosion(int x, int y, String[] frames) {
 
+        this.frames = frames;
         this.x = x;
         this.y = y;
-        this.visibleFrames = LIFE;
+        this.visibleFrames = frames.length * HOLD;
 
-        var ii = new ImageIcon(IMG_VFX_EXPLOSION[0]);
-        setImage(ii.getImage());
+        setImage(new ImageIcon(frames[0]).getImage());
     }
 
+    // Step through the pictures as the explosion runs out of time
     @Override
     public void visibleCountDown() {
         super.visibleCountDown();
 
-        int step = (LIFE - visibleFrames) / 4;
-        if (step > IMG_VFX_EXPLOSION.length - 1) {
-            step = IMG_VFX_EXPLOSION.length - 1;
+        int step = (frames.length * HOLD - visibleFrames) / HOLD;
+        if (step > frames.length - 1) {
+            step = frames.length - 1;
         }
-        setImage(new ImageIcon(IMG_VFX_EXPLOSION[step]).getImage());
+        setImage(new ImageIcon(frames[step]).getImage());
     }
 
     public void act(int direction) {

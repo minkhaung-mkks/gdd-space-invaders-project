@@ -53,6 +53,7 @@ public class Scene1 extends JPanel {
     private int frame = 0;
     private List<PowerUp> powerups;
     private List<Satellite> satellites;
+    private int deathTimer = 0;
     private List<Enemy> enemies;
     private List<Explosion> explosions;
     private List<Shot> shots;
@@ -350,6 +351,13 @@ public class Scene1 extends JPanel {
 
             if (enemy.isVisible()) {
 
+                // Alien2 hangs from the ceiling on a thin thread
+                if (enemy instanceof Alien2) {
+                    int cx = enemy.getX() + enemy.getImage().getWidth(null) / 2;
+                    g.setColor(Color.white);
+                    g.drawLine(cx, 0, cx, enemy.getY());
+                }
+
                 g.drawImage(enemy.getImage(), enemy.getX(), enemy.getY(), this);
 
                 // Floating health bar, only once the enemy has taken damage
@@ -453,11 +461,6 @@ public class Scene1 extends JPanel {
             g.drawImage(player.getImage(), player.getX(), player.getY(), this);
         }
 
-        if (player.isDying()) {
-
-            player.die();
-            inGame = false;
-        }
     }
 
     private void drawSatellites(Graphics g) {
@@ -482,6 +485,13 @@ public class Scene1 extends JPanel {
         for (Enemy e : enemies) {
             if (e instanceof Alien1) {
                 Alien1.Bomb bomb = ((Alien1) e).getBomb();
+                if (!bomb.isDestroyed()) {
+                    g.drawImage(bomb.getImage(), bomb.getX(), bomb.getY(), this);
+                }
+            }
+
+            if (e instanceof Alien2) {
+                Alien2.Bomb bomb = ((Alien2) e).getBomb();
                 if (!bomb.isDestroyed()) {
                     g.drawImage(bomb.getImage(), bomb.getX(), bomb.getY(), this);
                 }
@@ -717,7 +727,6 @@ public class Scene1 extends JPanel {
 
 
         // Check enemy spawn
-        // TODO this approach can only spawn one enemy at a frame
         SpawnDetails sd = spawnMap.get(frame);
         if (sd != null) {
             // Create a new enemy based on the spawn details
@@ -781,9 +790,22 @@ public class Scene1 extends JPanel {
                 && hitsTerrain(player.getX(), player.getY(),
                         player.getImage().getWidth(null),
                         player.getImage().getHeight(null))) {
-            var ii = new ImageIcon(IMG_VFX_EXPLOSION[0]);
-            player.setImage(ii.getImage());
             player.setDying(true);
+        }
+
+       
+        // wait for the explosion to finish before showing the game over screen
+        if (player.isDying() && player.isVisible()) {
+            explosions.add(new Explosion(player.getX(), player.getY(),
+                    IMG_VFX_PLAYER_EXPLOSION));
+            player.die();
+            deathTimer = IMG_VFX_PLAYER_EXPLOSION.length * 4;
+        }
+        if (deathTimer > 0) {
+            deathTimer--;
+            if (deathTimer == 0) {
+                inGame = false;
+            }
         }
 
         while (satellites.size() < player.getSplitShotCount()) {
@@ -810,6 +832,12 @@ public class Scene1 extends JPanel {
             if (enemy.isVisible()) {
                 int ox = enemy.getX();
                 int oy = enemy.getY();
+
+                // Alien2 follows the player up and down
+                if (enemy instanceof Alien2) {
+                    ((Alien2) enemy).track(player.getY());
+                }
+
                 enemy.act(direction);
 
                 // Collect any projectiles a Mage fired this frame
@@ -820,7 +848,9 @@ public class Scene1 extends JPanel {
                 int w = enemy.getImage().getWidth(null);
                 int h = enemy.getImage().getHeight(null);
 
-                 if (hitsTerrain(enemy.getX(), enemy.getY(), w, h)) {
+                // Alien2 is pinned to its thread, so terrain must not shove it
+                if (!(enemy instanceof Alien2)
+                        && hitsTerrain(enemy.getX(), enemy.getY(), w, h)) {
                     enemy.setX(ox - TERRAIN_SPEED);
                     enemy.setY(oy);
                 }
@@ -849,10 +879,7 @@ public class Scene1 extends JPanel {
                 player.damage(1);
                 mf.die();
                 mageShotsToRemove.add(mf);
-                if (player.isDying()) {
-                    var ii = new ImageIcon(IMG_VFX_EXPLOSION[0]);
-                    player.setImage(ii.getImage());
-                }
+
             }
         }
         mageShots.removeAll(mageShotsToRemove);
@@ -888,10 +915,7 @@ public class Scene1 extends JPanel {
                 player.damage(1);
                 bp.die();
                 bossShotsToRemove.add(bp);
-                if (player.isDying()) {
-                    var ii = new ImageIcon(IMG_VFX_EXPLOSION[0]);
-                    player.setImage(ii.getImage());
-                }
+
             }
         }
         bossShots.removeAll(bossShotsToRemove);
@@ -902,16 +926,22 @@ public class Scene1 extends JPanel {
             if (obstacle.isVisible()) {
                 obstacle.act();
 
-                if (obstacle.collidesWith(player)) {
-                    var ii = new ImageIcon(IMG_VFX_EXPLOSION[0]);
-                    player.setImage(ii.getImage());
-                    player.setDying(true);
+                // Flying into it sets it off and hurts the ship
+                if (player.isVisible() && !player.isDying()
+                        && obstacle.collidesWith(player)) {
+                    explosions.add(new Explosion(obstacle.getX(), obstacle.getY(),
+                            IMG_VFX_OBSTACLE_EXPLOSION));
+                    obstacle.die();
+                    player.damage(1);
                 }
 
                 if (obstacle.getX() < -100) {
                     obstacle.die();
-                    obstaclesToRemove.add(obstacle);
                 }
+            }
+
+            if (!obstacle.isVisible()) {
+                obstaclesToRemove.add(obstacle);
             }
         }
         obstacles.removeAll(obstaclesToRemove);
@@ -961,12 +991,19 @@ public class Scene1 extends JPanel {
                     shotsToRemove.add(shot);
                 }
 
-                // Obstacles block shots
+                // Obstacles block shots, and break after enough hits
                 for (Obstacle obstacle : obstacles) {
                     if (obstacle.isVisible() && shot.isVisible()
                             && shot.collidesWith(obstacle)) {
                         shot.die();
                         shotsToRemove.add(shot);
+
+                        obstacle.damage(1);
+                        if (obstacle.isDying()) {
+                            explosions.add(new Explosion(obstacle.getX(), obstacle.getY(),
+                                    IMG_VFX_OBSTACLE_EXPLOSION));
+                            obstacle.die();
+                        }
                     }
                 }
 
@@ -1052,10 +1089,44 @@ public class Scene1 extends JPanel {
                 bomb.setDestroyed(true);
 
                 // Explosion sprite only on the fatal hit
-                if (player.isDying()) {
-                    var ii = new ImageIcon(IMG_VFX_EXPLOSION[0]);
-                    player.setImage(ii.getImage());
-                }
+
+            }
+
+            if (!bomb.isDestroyed() && bomb.getX() < 0) {
+                bomb.setDestroyed(true);
+            }
+        }
+
+        // Same again for Alien2, which has its own bomb
+        for (Enemy enemy : enemies) {
+
+            if (!(enemy instanceof Alien2)) {
+                continue;
+            }
+
+            Alien2.Bomb bomb = ((Alien2) enemy).getBomb();
+
+            int chance = randomizer.nextInt(15);
+
+            if (chance == CHANCE && enemy.isVisible() && bomb.isDestroyed()) {
+
+                bomb.setDestroyed(false);
+                bomb.setX(enemy.getX());
+                bomb.setY(enemy.getY());
+                ((Alien2) enemy).notifyShoot(); // play the ATTACK animation
+                AudioPlayer.playSound("src/audio/alien_shoot.wav", -8f);
+            }
+
+            // Faster than the Alien1 bomb
+            if (!bomb.isDestroyed()) {
+                bomb.setX(bomb.getX() - 7);
+            }
+
+            if (player.isVisible() && !bomb.isDestroyed()
+                    && bomb.collidesWith(player)) {
+
+                player.damage(1);
+                bomb.setDestroyed(true);
             }
 
             if (!bomb.isDestroyed() && bomb.getX() < 0) {

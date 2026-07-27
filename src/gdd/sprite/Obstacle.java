@@ -1,13 +1,12 @@
 package gdd.sprite;
 
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.image.BufferedImage;
+import static gdd.Global.*;
+import javax.swing.ImageIcon;
 
 public class Obstacle extends Sprite {
 
     private static final int SPEED = 2;
-    private static final int SIZE = 60;
+    private static final int MAX_HP = 3; // shots needed to break it
 
     public Obstacle(int x, int y) {
         initObstacle(x, y);
@@ -18,14 +17,11 @@ public class Obstacle extends Sprite {
         this.x = x;
         this.y = y;
 
-        BufferedImage img = new BufferedImage(SIZE, SIZE, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g2 = img.createGraphics();
+        health = MAX_HP;
+        maxHealth = MAX_HP;
 
-        g2.setColor(new Color(120, 85, 60));
-        g2.fillOval(0, 0, SIZE, SIZE);
-
-        g2.dispose();
-        setImage(img);
+        var ii = new ImageIcon(IMG_OBSTACLE);
+        setImage(ii.getImage());
     }
 
     @Override
