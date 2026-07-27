@@ -5,18 +5,60 @@ Super - from Super Robot Wars ( the goated franchise, SD Gundam wish it could be
 Copyright - .... ( Please don't sue us TwT )
 Invaders - from Space invaders the inspiration and base project of our game dev course.
 
+## Team Members
+- 6712164 - Min Khaung Kyaw Swar
+- 6726129 - Lwin Pyae Aung
+
 ## Control
+| Key | Action |
+|---|---|
+| `W` / `Up-arrow` | move up |
+| `S` / `Down-arrow` | move down |
+| `A` / `Left-arrow` | move back |
+| `D` / `Right-arrow` | move forward |
+| `Space` | shoot, and interact with menu screens |
 
 ## Powerups
-Speedup - makes your spaceship go faster..zooom zoom. ( Max:2 )
-Multishot - allows you to fire faster. dzz dzz dzz ( Max: 4 )
-Splitshot - Summons a probe to orbit around you and shoot. Pew pew ( Max: 2 )
-Bigshot - Makes your shots bigger and change color. you start with a nice personality....(Max: 2)
+| | | |
+|---|---|---|
+| <img src="docs/powerup_speed.png" height="60"> | **Speedup** | makes your spaceship go faster..zooom zoom. ( Max: 2 ) |
+| <img src="docs/powerup_multi.png" height="60"> | **Multishot** | allows you to fire faster. dzz dzz dzz ( Max: 4 ) |
+| <img src="docs/powerup_split.png" height="60"> | **Splitshot** | Summons a probe to orbit around you and shoot. Pew pew ( Max: 2 ) |
+| <img src="docs/powerup_big.png" height="60"> | **Bigshot** | Makes your shots bigger and change color. you start with a nice personality....( Max: 2 ) |
+| <img src="docs/powerup_heal.png" height="60"> | **Heal** | Patches you back up. Not that it will save you. |
 
 ## Story
+You are a normal guy tasked to fight the radam beast invasion because ~~we~~ the department of war doesn't have the ~~budget~~ means necessary to ~~animate~~ contact tekkaman and other cool superheroes and mechs. So they said why not just send someone thats easier to get. Usually these beasts are called the sourge of the universe and the plague upon worlds but hey you are john, and John have nothing to live for so why not try taking out the aliens and get a nice death. You won't return even if you win because we can only supply you enough fuel for a oneway trip. Good luck have fun! 
 
 ## Characters
 
+### Player
+<img src="docs/player.gif" height="60">
+
+The ~~poor sob~~ hero that will not make it back home.
+
+### Alien1
+<img src="docs/alien1.gif" height="110">
+
+Normal bugs that just shoots disgusting toxins at you.
+
+### Alien2
+<img src="docs/alien2.gif" height="110">
+
+Spider-like bugs on a web string that goes up and down. Their toxin shots are faster.
+
+### Mage
+<img src="docs/mage.gif" height="110">
+
+Goes around the map and shoots fireballs at you. ( honestly my favourite to animate )
+
+### Mother Radam
+<img src="docs/boss.gif" height="130">
+
+A giant boss that have 3 phases.
+- 1st phase - only shoots cresent-like claw attacks.
+- 2nd phase - also normal shoot a triple split shot from their mouth.
+- 3rd phase - Now also summons meteors..... Good luck!
 
 ## References
 This project is based from this 
@@ -41,12 +83,21 @@ Radam Beast (Air) Ripped by Domobot from Super Robot Wars J - https://www.sprite
 Radam Beast (Ground) Ripped by Domobot from Super Robot Wars J - https://www.spriters-resource.com/game_boy_advance/srwj/asset/36949/ - Original Franchise: Tekkaman. Copyright: Tatsunoko Production and Bandai Namco Entertainment.
 Used as Alien2.
 
+Powerbot Ripped by Domobot from Super Robot Wars K - https://www.spriters-resource.com/ds_dsi/srwk/asset/164524/ - Original Franchise: Overman King Gainer. Copyright: Bandai Namco Entertainment.
+Used as bomb.
+
+Vic Viper Ripped by Alekz from Salamander - https://www.spriters-resource.com/ds_dsi/srwk/asset/164524/ - Original Franchise: Salamander. Copyright: Konami.
+Used as Player.
+
 ## Music Used
 NES Shooter Music (5 tracks, 3 jingles) by SketchyLogic - https://opengameart.org/content/nes-shooter-music-5-tracks-3-jingles - Licsence CC-3.0
 - Mar track used for title screen,
 - Mercury Track used for scene 2,
 - Map (basic version) used for scene 1,
 - Boss theme used for boss.
+- Intro Jingle for starting game
+- Warp Jingle for game over screen
+- Win Jingle for game won screen.
 
 ## SFX used
 Laser Fire by dklon - https://opengameart.org/content/laser-fire - Licsence CC-3.0, used 2 of the items here for player shoot, boss screech for 3 fire.
@@ -67,5 +118,9 @@ Beetle Squark5.wav by warrenXG -- https://freesound.org/s/502211/ -- License: Cr
 
 
 # To fix
--Fix the dashboard
--Make the levels
+- Fix the dashboard
+- Make the levels
+- Add gameover screen - allow restarting with R or Space
+- Add game won screen
+- Add invince frame and blinking when damaged to player.
+- Reduce player hp to starting with 3
