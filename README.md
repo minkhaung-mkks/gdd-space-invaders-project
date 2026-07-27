@@ -12,6 +12,24 @@ A game made for our Game Dev Class Project with so much copyrighted assets from 
 - 6712164 - Min Khaung Kyaw Swar
 - 6726129 - Lwin Pyae Aung
 
+## Build & Run
+
+**Requires:** [OpenJDK 17+](https://openjdk.org/) (built and tested on Corretto 17).
+
+macOS/Linux:
+```bash
+javac -d out $(find src -name "*.java")
+java -cp out gdd.Main
+```
+
+Windows (PowerShell):
+```powershell
+javac -d out (Get-ChildItem -Recurse -Filter *.java src | % FullName)
+java -cp out gdd.Main
+```
+
+**Run from the project root** Assets are loaded by relative path (`src/audio/...`, `src/images/...`, `src/levels/...`), so launching from anywhere else starts the game with no art or sound.
+
 ## Control
 | Key | Action |
 |---|---|
@@ -20,6 +38,7 @@ A game made for our Game Dev Class Project with so much copyrighted assets from 
 | `A` / `Left-arrow` | move back |
 | `D` / `Right-arrow` | move forward |
 | `Space` | shoot, and interact with menu screens |
+| `Escape` | pause / resume |
 
 ## Powerups
 | Icon | Name | Description |
@@ -99,13 +118,6 @@ This created a situtation where we were more inclined to choose a path without p
 This project is based from this 
 [Space Invader](https://github.com/janbodnar/Java-Space-Invaders) repository.
 
-## Tools used
-- [Canva for creating sprite sheets manually (this was a pain TwT)](https://canva.link/nv44o1h7qqe861e)
-- [remove.bg to remove backgrounds from Canva sheets after saving.](https://www.remove.bg/)
-- [Canva for title screen, Game Over, Game Won.](https://canva.link/14a4xawg48vh2s1)
-- apple's built in CLI library to convert from other sound formats to wav.
-- Level Editor with html canvas that exports to CSV.
-- Python Scripts to cut and fix problematic vfx or terrains.
 
 ## Assets used
 Most of the assets used in this game are from old games that I loved or ones i thought would fit in nicely with the theme of my game.
@@ -202,3 +214,12 @@ bomb_explosion_8bit by Luke.RUSTLTD(www.rustltd.com)
 - https://opengameart.org/content/bombexplosion8bit 
 - License CC0. 
 - Used for bomb explosion.
+
+## Tools used
+- [Canva for creating sprite sheets manually (this was a pain TwT)](https://canva.link/nv44o1h7qqe861e)
+- [remove.bg to remove backgrounds from Canva sheets after saving.](https://www.remove.bg/)
+- [Canva for title screen, Game Over, Game Won.](https://canva.link/14a4xawg48vh2s1)
+- [Canva for Terrain Tiles](https://canva.link/tq5jdglngyzkcq8)
+- Apple's built in CLI library to convert from other sound formats to wav.
+- [Level Editor with html canvas that exports to CSV.](https://github.com/minkhaung-mkks/level-editor)
+- [Python Scripts to cut and fix problematic vfx or terrains.](https://github.com/minkhaung-mkks/super-copyright-invaders-tools)
